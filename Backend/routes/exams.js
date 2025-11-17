@@ -1,0 +1,20 @@
+const express = require('express');
+const { body } = require('express-validator');
+const { createExam, getAllExams, getExamById, updateExam, deleteExam } = require('../controllers/examController');
+const { authenticate, authorize } = require('../middleware/auth');
+
+const router = express.Router();
+
+const examValidation = [
+  body('qpId').notEmpty().withMessage('Question paper ID is required'),
+  body('batchId').notEmpty().withMessage('Batch ID is required'),
+  body('date').isISO8601().withMessage('Valid exam date is required')
+];
+
+router.post('/', authenticate, authorize('admin'), examValidation, createExam);
+router.get('/', authenticate, getAllExams);
+router.get('/:id', authenticate, getExamById);
+router.put('/:id', authenticate, authorize('admin'), updateExam);
+router.delete('/:id', authenticate, authorize('admin'), deleteExam);
+
+module.exports = router;
