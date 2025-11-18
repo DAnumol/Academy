@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Timetable = sequelize.define('Timetable', {
     timetableId: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       primaryKey: true,
       allowNull: false
     },
@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
     schedule: {
       type: DataTypes.JSON,
       allowNull: false
+    },
+      status: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
     createdBy: {
       type: DataTypes.STRING(10),
