@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Material = sequelize.define('Material', {
     materialId: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       primaryKey: true,
       allowNull: false
     },
@@ -25,14 +25,19 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING(255),
       allowNull: false
     },
-    uploadedBy: {
-      type: DataTypes.STRING(10),
+     status: {
+       type: DataTypes.BOOLEAN,
       allowNull: false,
-      references: {
-        model: 'staffs',
-        key: 'staffId'
-      }
-    }
+      defaultValue: true,
+    },
+    // uploadedBy: {
+    //   type: DataTypes.STRING(20),
+    //   allowNull: false,
+    //   references: {
+    //     model: 'staffs',
+    //     key: 'staffId'
+    //   }
+    // }
   }, {
     tableName: 'materials',
     timestamps: true

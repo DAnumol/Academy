@@ -9,7 +9,7 @@ const markAttendance = async (req, res) => {
     const attendance = await Attendance.create({
       attendanceId: generateIds.attendance(),
       batchId, subjectId, date, records,
-      markedBy: req.user.role === 'staff' ? req.user.staffProfile?.staffId : req.user.userId
+      // markedBy: req.user.staffProfile?.staffId || req.user.userId
     });
 
     sendSuccess(res, 'Attendance marked successfully', attendance, 201);

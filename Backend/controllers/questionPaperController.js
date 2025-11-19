@@ -4,13 +4,33 @@ const { sendSuccess, sendError } = require('../utils/response');
 
 const createQuestionPaper = async (req, res) => {
   try {
-    const { courseId, subjectId, batchId, title, description, examDate, totalMarks, duration, questionSet } = req.body;
+    const { courseId, subjectId, batchId, title, description, examDate, totalMarks, duration, questionSet, status } = req.body;
 
+    // Parse questionSet if it's a string
+    let parsedQuestionSet = questionSet;
+    if (typeof questionSet === 'string') {
+      try {
+        parsedQuestionSet = JSON.parse(questionSet);
+      } catch (e) {
+        console.error('Failed to parse questionSet:', e);
+        parsedQuestionSet = null;
+      }
+    }
+
+    const questionPaperStatus = status !== undefined ? Boolean(status) : true;
     const questionPaper = await QuestionPaper.create({
       qpId: generateIds.questionPaper(),
-      courseId, subjectId, batchId, title, description, examDate, totalMarks, duration, questionSet,
-      createdBy: req.user.role === 'staff' ? req.user.staffProfile?.staffId : req.user.userId,
-      fileUrl: req.file ? req.file.path : null
+      courseId, 
+      subjectId, 
+      batchId, 
+      title, 
+      description, 
+      examDate, 
+      totalMarks, 
+      duration, 
+      questionSet: parsedQuestionSet,
+      fileUrl: req.file?.path || null,
+      status: questionPaperStatus
     });
 
     sendSuccess(res, 'Question paper created successfully', questionPaper, 201);
@@ -50,7 +70,8 @@ const getAllQuestionPapers = async (req, res) => {
 
 const getQuestionPaperById = async (req, res) => {
   try {
-    const questionPaper = await QuestionPaper.findByPk(req.params.id, {
+    const questionPaper = await QuestionPaper.findOne({
+      where: { qpId: req.params.id },
       include: [
         { model: Subject, as: 'subject' },
         { model: Batch, as: 'batch' }
@@ -68,6 +89,15 @@ const updateQuestionPaper = async (req, res) => {
   try {
     const updateData = req.body;
     if (req.file) updateData.fileUrl = req.file.path;
+    
+    // Parse questionSet if it's a string
+    if (updateData.questionSet && typeof updateData.questionSet === 'string') {
+      try {
+        updateData.questionSet = JSON.parse(updateData.questionSet);
+      } catch (e) {
+        console.error('Failed to parse questionSet:', e);
+      }
+    }
 
     const [updatedRowsCount] = await QuestionPaper.update(updateData, {
       where: { qpId: req.params.id }
@@ -75,7 +105,9 @@ const updateQuestionPaper = async (req, res) => {
 
     if (updatedRowsCount === 0) return sendError(res, 404, 'Question paper not found');
 
-    const updatedQuestionPaper = await QuestionPaper.findByPk(req.params.id);
+    const updatedQuestionPaper = await QuestionPaper.findOne({
+      where: { qpId: req.params.id }
+    });
     sendSuccess(res, 'Question paper updated successfully', updatedQuestionPaper);
   } catch (error) {
     sendError(res, 500, 'Failed to update question paper', error);

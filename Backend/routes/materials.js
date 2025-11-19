@@ -11,10 +11,10 @@ const materialValidation = [
   body('title').notEmpty().withMessage('Title is required')
 ];
 
-router.post('/', authenticate, authorize('staff'), upload.single('material'), materialValidation, uploadMaterial);
+router.post('/', authenticate, authorize('staff','admin'), upload.single('material'), materialValidation, uploadMaterial);
 router.get('/', authenticate, getAllMaterials);
 router.get('/:id', authenticate, getMaterialById);
-router.put('/:id', authenticate, authorize('staff'), upload.single('material'), updateMaterial);
+router.put('/:id', authenticate, authorize('staff','admin'), upload.single('material'), updateMaterial);
 router.delete('/:id', authenticate, authorize('admin', 'staff'), deleteMaterial);
 
 module.exports = router;

@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const QuestionPaper = sequelize.define('QuestionPaper', {
     qpId: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       primaryKey: true,
       allowNull: false
     },
@@ -29,14 +29,14 @@ module.exports = (sequelize, DataTypes) => {
         key: 'batchId'
       }
     },
-    createdBy: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-      references: {
-        model: 'staffs',
-        key: 'staffId'
-      }
-    },
+    // createdBy: {
+    //   type: DataTypes.STRING(10),
+    //   allowNull: false,
+    //   references: {
+    //     model: 'staffs',
+    //     key: 'staffId'
+    //   }
+    // },
     title: {
       type: DataTypes.STRING(200),
       allowNull: false
@@ -64,7 +64,12 @@ module.exports = (sequelize, DataTypes) => {
     questionSet: {
       type: DataTypes.JSON,
       allowNull: true
-    }
+    },
+    status: {
+       type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
   }, {
     tableName: 'questionpapers',
     timestamps: true

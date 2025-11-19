@@ -12,7 +12,7 @@ const attendanceValidation = [
   body('records').isArray().withMessage('Records must be an array')
 ];
 
-router.post('/', authenticate, authorize('staff'), attendanceValidation, markAttendance);
+router.post('/', authenticate, authorize('admin', 'staff'), attendanceValidation, markAttendance);
 router.get('/', authenticate, getAttendance);
 router.get('/:id', authenticate, getAttendanceById);
 router.put('/:id', authenticate, authorize('staff'), updateAttendance);

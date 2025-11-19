@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Attendance = sequelize.define('Attendance', {
     attendanceId: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       primaryKey: true,
       allowNull: false
     },
@@ -29,14 +29,14 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.JSON,
       allowNull: false
     },
-    markedBy: {
-      type: DataTypes.STRING(10),
-      allowNull: false,
-      references: {
-        model: 'staffs',
-        key: 'staffId'
-      }
-    }
+    // markedBy: {
+    //   type: DataTypes.STRING(10),
+    //   allowNull: false,
+    //   references: {
+    //     model: 'staffs',
+    //     key: 'staffId'
+    //   }
+    // }
   }, {
     tableName: 'attendance',
     timestamps: true

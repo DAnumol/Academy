@@ -1151,42 +1151,42 @@ const seedData = async () => {
     await db.QuestionPaper.bulkCreate(questionPapers);
     console.log('✅ Question Papers seeded');
  
-    // Attendance
-    const attendances = [
-      {
-        attendanceId: 'ATT001',
-        batchId: 'B001',
-        subjectId: 'SUB001',
-        date: '2024-11-04',
-        records: [
-          { studentId: 'STU001', status: 'Present' },
-          { studentId: 'STU002', status: 'Present' }
-        ],
-        markedBy: 'STF001'
-      },
-      {
-        attendanceId: 'ATT002',
-        batchId: 'B001',
-        subjectId: 'SUB002',
-        date: '2024-11-04',
-        records: [
-          { studentId: 'STU001', status: 'Present' },
-          { studentId: 'STU002', status: 'Absent' }
-        ],
-        markedBy: 'STF002'
-      },
-      {
-        attendanceId: 'ATT003',
-        batchId: 'B001',
-        subjectId: 'SUB003',
-        date: '2024-11-05',
-        records: [
-          { studentId: 'STU001', status: 'Present' },
-          { studentId: 'STU002', status: 'Present' }
-        ],
-        markedBy: 'STF003'
-      }
-    ];
+    // // Attendance
+    // const attendances = [
+    //   {
+    //     attendanceId: 'ATT001',
+    //     batchId: 'B001',
+    //     subjectId: 'SUB001',
+    //     date: '2024-11-04',
+    //     records: [
+    //       { studentId: 'STU001', status: 'Present' },
+    //       { studentId: 'STU002', status: 'Present' }
+    //     ],
+    //     markedBy: 'STF001'
+    //   },
+    //   {
+    //     attendanceId: 'ATT002',
+    //     batchId: 'B001',
+    //     subjectId: 'SUB002',
+    //     date: '2024-11-04',
+    //     records: [
+    //       { studentId: 'STU001', status: 'Present' },
+    //       { studentId: 'STU002', status: 'Absent' }
+    //     ],
+    //     markedBy: 'STF002'
+    //   },
+    //   {
+    //     attendanceId: 'ATT003',
+    //     batchId: 'B001',
+    //     subjectId: 'SUB003',
+    //     date: '2024-11-05',
+    //     records: [
+    //       { studentId: 'STU001', status: 'Present' },
+    //       { studentId: 'STU002', status: 'Present' }
+    //     ],
+    //     markedBy: 'STF003'
+    //   }
+    // ];
  
     await db.Attendance.bulkCreate(attendances);
     console.log('✅ Attendance seeded');

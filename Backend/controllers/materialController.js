@@ -4,17 +4,20 @@ const { sendSuccess, sendError } = require('../utils/response');
 
 const uploadMaterial = async (req, res) => {
   try {
-    const { subjectId, title, description } = req.body;
+    const { subjectId, title, description, status } = req.body;
 
     if (!req.file) {
       return sendError(res, 400, 'File is required');
     }
 
+    const materialStatus = status !== undefined ? Boolean(status) : true;
+    
     const material = await Material.create({
       materialId: generateIds.material(),
       subjectId, title, description,
       fileUrl: req.file.path,
-      uploadedBy: req.user.role === 'staff' ? req.user.staffProfile?.staffId : req.user.userId
+      // uploadedBy: req.user.staffProfile?.staffId || req.user.userId,
+      status: materialStatus
     });
 
     sendSuccess(res, 'Material uploaded successfully', material, 201);
@@ -50,7 +53,8 @@ const getAllMaterials = async (req, res) => {
 
 const getMaterialById = async (req, res) => {
   try {
-    const material = await Material.findByPk(req.params.id, {
+    const material = await Material.findOne({
+      where: { materialId: req.params.id },
       include: [{ model: Subject, as: 'subject' }]
     });
 
@@ -72,7 +76,9 @@ const updateMaterial = async (req, res) => {
 
     if (updatedRowsCount === 0) return sendError(res, 404, 'Material not found');
 
-    const updatedMaterial = await Material.findByPk(req.params.id);
+    const updatedMaterial = await Material.findOne({
+      where: { materialId: req.params.id }
+    });
     sendSuccess(res, 'Material updated successfully', updatedMaterial);
   } catch (error) {
     sendError(res, 500, 'Failed to update material', error);
