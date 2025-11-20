@@ -4,12 +4,15 @@ const { sendSuccess, sendError } = require('../utils/response');
 
 const createResult = async (req, res) => {
   try {
-    const { studentId, examId, totalMarks, obtainedMarks, grade, remarks } = req.body;
+    const { studentId, examId, totalMarks, obtainedMarks, grade, remarks,status } = req.body;
     const percentage = (obtainedMarks / totalMarks) * 100;
+
+    const resultStatus = status !== undefined ? Boolean(status) : true;
 
     const result = await Result.create({
       resultId: generateIds.result(),
-      studentId, examId, totalMarks, obtainedMarks, percentage, grade, remarks
+      studentId, examId, totalMarks, obtainedMarks, percentage, grade, remarks,
+      status: resultStatus
     });
 
     sendSuccess(res, 'Result created successfully', result, 201);
@@ -49,7 +52,8 @@ const getAllResults = async (req, res) => {
 
 const getResultById = async (req, res) => {
   try {
-    const result = await Result.findByPk(req.params.id, {
+    const result = await Result.findOne({
+      where: { resultId: req.params.id },
       include: [
         { model: Student, as: 'student' },
         { model: Exam, as: 'exam' }
@@ -76,7 +80,9 @@ const updateResult = async (req, res) => {
 
     if (updatedRowsCount === 0) return sendError(res, 404, 'Result not found');
 
-    const updatedResult = await Result.findByPk(req.params.id);
+    const updatedResult = await Result.findOne({
+      where: { resultId: req.params.id }
+    });
     sendSuccess(res, 'Result updated successfully', updatedResult);
   } catch (error) {
     sendError(res, 500, 'Failed to update result', error);

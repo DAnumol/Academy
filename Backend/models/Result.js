@@ -1,7 +1,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Result = sequelize.define('Result', {
     resultId: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       primaryKey: true,
       allowNull: false
     },
@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     examId: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       allowNull: false,
       references: {
         model: 'exams',
@@ -40,6 +40,11 @@ module.exports = (sequelize, DataTypes) => {
     remarks: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    status: {
+       type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     }
   }, {
     tableName: 'results',
