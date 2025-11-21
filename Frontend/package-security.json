@@ -1,0 +1,24 @@
+{
+  "name": "enterprise-security-dependencies",
+  "description": "Security dependencies for enterprise-grade React template",
+  "dependencies": {
+    "dompurify": "^3.0.5",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "cors": "^2.8.5",
+    "express-validator": "^7.0.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.0.5",
+    "eslint-plugin-security": "^1.7.1",
+    "eslint-plugin-no-unsanitized": "^4.0.2"
+  },
+  "scripts": {
+    "security:audit": "npm audit --audit-level moderate",
+    "security:fix": "npm audit fix",
+    "security:check": "eslint --ext .js,.jsx,.ts,.tsx src/ --config .eslintrc.security.js"
+  }
+}
