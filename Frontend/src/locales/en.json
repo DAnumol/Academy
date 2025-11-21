@@ -1,0 +1,67 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "search": "Search",
+    "filter": "Filter",
+    "export": "Export",
+    "import": "Import"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "rememberMe": "Remember Me",
+    "loginSuccess": "Login successful",
+    "loginError": "Invalid credentials"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "analytics": "Analytics",
+    "users": "Users",
+    "tasks": "Tasks",
+    "settings": "Settings",
+    "profile": "Profile"
+  },
+  "dashboard": {
+    "welcome": "Welcome back, {{name}}!",
+    "totalUsers": "Total Users",
+    "activeUsers": "Active Users",
+    "revenue": "Revenue",
+    "growth": "Growth"
+  },
+  "users": {
+    "title": "User Management",
+    "addUser": "Add User",
+    "editUser": "Edit User",
+    "deleteUser": "Delete User",
+    "userDeleted": "User deleted successfully",
+    "name": "Name",
+    "role": "Role",
+    "status": "Status",
+    "lastLogin": "Last Login"
+  },
+  "files": {
+    "upload": "Upload Files",
+    "download": "Download",
+    "maxSize": "Maximum file size: {{size}}MB",
+    "allowedTypes": "Allowed types: {{types}}",
+    "uploadSuccess": "File uploaded successfully",
+    "uploadError": "Upload failed: {{error}}",
+    "dragDrop": "Drag and drop files here or click to browse"
+  },
+  "offline": {
+    "status": "You are offline",
+    "syncPending": "{{count}} changes pending sync",
+    "syncSuccess": "Data synchronized successfully",
+    "syncError": "Sync failed, will retry automatically"
+  }
+}

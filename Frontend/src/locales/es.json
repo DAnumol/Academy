@@ -1,0 +1,67 @@
+{
+  "common": {
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "confirm": "Confirmar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "export": "Exportar",
+    "import": "Importar"
+  },
+  "auth": {
+    "login": "Iniciar Sesión",
+    "logout": "Cerrar Sesión",
+    "email": "Correo Electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "rememberMe": "Recordarme",
+    "loginSuccess": "Inicio de sesión exitoso",
+    "loginError": "Credenciales inválidas"
+  },
+  "navigation": {
+    "dashboard": "Panel de Control",
+    "analytics": "Analíticas",
+    "users": "Usuarios",
+    "tasks": "Tareas",
+    "settings": "Configuración",
+    "profile": "Perfil"
+  },
+  "dashboard": {
+    "welcome": "¡Bienvenido de vuelta, {{name}}!",
+    "totalUsers": "Total de Usuarios",
+    "activeUsers": "Usuarios Activos",
+    "revenue": "Ingresos",
+    "growth": "Crecimiento"
+  },
+  "users": {
+    "title": "Gestión de Usuarios",
+    "addUser": "Agregar Usuario",
+    "editUser": "Editar Usuario",
+    "deleteUser": "Eliminar Usuario",
+    "userDeleted": "Usuario eliminado exitosamente",
+    "name": "Nombre",
+    "role": "Rol",
+    "status": "Estado",
+    "lastLogin": "Último Acceso"
+  },
+  "files": {
+    "upload": "Subir Archivos",
+    "download": "Descargar",
+    "maxSize": "Tamaño máximo: {{size}}MB",
+    "allowedTypes": "Tipos permitidos: {{types}}",
+    "uploadSuccess": "Archivo subido exitosamente",
+    "uploadError": "Error en la subida: {{error}}",
+    "dragDrop": "Arrastra y suelta archivos aquí o haz clic para explorar"
+  },
+  "offline": {
+    "status": "Estás desconectado",
+    "syncPending": "{{count}} cambios pendientes de sincronización",
+    "syncSuccess": "Datos sincronizados exitosamente",
+    "syncError": "Error de sincronización, se reintentará automáticamente"
+  }
+}
