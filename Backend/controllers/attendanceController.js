@@ -92,4 +92,59 @@ const deleteAttendance = async (req, res) => {
   }
 };
 
-module.exports = { markAttendance, getAttendance, getAttendanceById, updateAttendance, deleteAttendance };
+const getStudentAttendance = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+    const { month, year } = req.query;
+
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+
+    const { Op } = require('sequelize');
+    const attendance = await Attendance.findAll({
+      where: {
+        date: {
+          [Op.between]: [startDate, endDate]
+        }
+      },
+      include: [
+        { model: Subject, as: 'subject', attributes: ['name'] }
+      ],
+      order: [['date', 'ASC']]
+    });
+
+    const studentRecords = [];
+    attendance.forEach(record => {
+      let records = record.records;
+      
+      // Parse if records is a string
+      if (typeof records === 'string') {
+        try {
+          records = JSON.parse(records);
+        } catch (e) {
+          console.error('Failed to parse records:', e);
+          return;
+        }
+      }
+      
+      if (records && Array.isArray(records)) {
+        records.forEach(r => {
+          if (r.studentId === studentId) {
+            studentRecords.push({
+              date: record.date,
+              attendanceStatus: r.attendanceStatus,
+              subject: record.subject?.name
+            });
+          }
+        });
+      }
+    });
+
+    sendSuccess(res, 'Student attendance retrieved successfully', studentRecords);
+  } catch (error) {
+    console.error('Error in getStudentAttendance:', error);
+    sendError(res, 500, 'Failed to get student attendance', error);
+  }
+};
+
+module.exports = { markAttendance, getAttendance, getAttendanceById, updateAttendance, deleteAttendance, getStudentAttendance };

@@ -2,11 +2,30 @@ const { QuestionPaper, Subject, Batch } = require('../models');
 const generateIds = require('../utils/generateId');
 const { sendSuccess, sendError } = require('../utils/response');
 
+const NEET_CONFIG = {
+  TOTAL_MARKS: 720,
+  TOTAL_QUESTIONS: 180,
+  MARKS_PER_CORRECT: 4,
+  MARKS_PER_INCORRECT: -1
+};
+
+const transformQuestionSet = (questionSet) => {
+  if (!questionSet || !Array.isArray(questionSet)) return null;
+  
+  return questionSet.map((q, index) => ({
+    id: `q${index + 1}`,
+    question: q.questionText || q.question,
+    type: 'mcq',
+    options: q.options || [],
+    correctAnswer: q.options && q.correctAnswer ? q.options[q.correctAnswer.charCodeAt(0) - 65] : q.correctAnswer,
+    marks: NEET_CONFIG.MARKS_PER_CORRECT
+  }));
+};
+
 const createQuestionPaper = async (req, res) => {
   try {
-    const { courseId, subjectId, batchId, title, description, examDate, totalMarks, duration, questionSet, status } = req.body;
+    const { courseId, subjectId, batchId, title, description, examDate, duration, questionSet, status } = req.body;
 
-    // Parse questionSet if it's a string
     let parsedQuestionSet = questionSet;
     if (typeof questionSet === 'string') {
       try {
@@ -16,8 +35,17 @@ const createQuestionPaper = async (req, res) => {
         parsedQuestionSet = null;
       }
     }
+    
+    if (parsedQuestionSet && Array.isArray(parsedQuestionSet) && parsedQuestionSet.length > 0) {
+      if (parsedQuestionSet.length !== NEET_CONFIG.TOTAL_QUESTIONS) {
+        return sendError(res, 400, `Question paper must have exactly ${NEET_CONFIG.TOTAL_QUESTIONS} questions`);
+      }
+    }
+    
+    const transformedQuestionSet = transformQuestionSet(parsedQuestionSet);
 
     const questionPaperStatus = status !== undefined ? Boolean(status) : true;
+    const fileUrl = req.file ? `/uploads/${req.file.path.replace(/\\/g, '/')}` : null;
     const questionPaper = await QuestionPaper.create({
       qpId: generateIds.questionPaper(),
       courseId, 
@@ -26,10 +54,10 @@ const createQuestionPaper = async (req, res) => {
       title, 
       description, 
       examDate, 
-      totalMarks, 
+      totalMarks: NEET_CONFIG.TOTAL_MARKS, 
       duration, 
-      questionSet: parsedQuestionSet,
-      fileUrl: req.file?.path || null,
+      questionSet: transformedQuestionSet,
+      fileUrl,
       status: questionPaperStatus
     });
 
@@ -88,9 +116,8 @@ const getQuestionPaperById = async (req, res) => {
 const updateQuestionPaper = async (req, res) => {
   try {
     const updateData = req.body;
-    if (req.file) updateData.fileUrl = req.file.path;
+    if (req.file) updateData.fileUrl = `/uploads/${req.file.path.replace(/\\/g, '/')}`;
     
-    // Parse questionSet if it's a string
     if (updateData.questionSet && typeof updateData.questionSet === 'string') {
       try {
         updateData.questionSet = JSON.parse(updateData.questionSet);
@@ -98,6 +125,15 @@ const updateQuestionPaper = async (req, res) => {
         console.error('Failed to parse questionSet:', e);
       }
     }
+    
+    if (updateData.questionSet && Array.isArray(updateData.questionSet) && updateData.questionSet.length > 0) {
+      if (updateData.questionSet.length !== NEET_CONFIG.TOTAL_QUESTIONS) {
+        return sendError(res, 400, `Question paper must have exactly ${NEET_CONFIG.TOTAL_QUESTIONS} questions`);
+      }
+      updateData.questionSet = transformQuestionSet(updateData.questionSet);
+    }
+    
+    updateData.totalMarks = NEET_CONFIG.TOTAL_MARKS;
 
     const [updatedRowsCount] = await QuestionPaper.update(updateData, {
       where: { qpId: req.params.id }

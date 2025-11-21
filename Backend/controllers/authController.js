@@ -32,7 +32,9 @@ const login = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      profile: user.studentProfile || user.staffProfile || null
+      avatar: user.studentProfile?.profilePic || user.staffProfile?.profilePic || null,
+      studentProfile: user.studentProfile || null,
+      staffProfile: user.staffProfile || null
     };
 
     sendSuccess(res, 'Login successful', { user: userData, token });
@@ -99,7 +101,9 @@ const getProfile = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
-      profile: user.studentProfile || user.staffProfile || null
+      avatar: user.studentProfile?.profilePic || user.staffProfile?.profilePic || null,
+      studentProfile: user.studentProfile || null,
+      staffProfile: user.staffProfile || null
     };
 
     sendSuccess(res, 'Profile retrieved successfully', userData);
@@ -108,4 +112,42 @@ const getProfile = async (req, res) => {
   }
 };
 
-module.exports = { login, register, getProfile };
+const registerAdmin = async (req, res) => {
+  try {
+    const { username, email, password, secretKey } = req.body;
+
+    console.log('Received secretKey:', secretKey);
+    console.log('Expected secretKey:', process.env.ADMIN_SECRET_KEY);
+    console.log('Match:', secretKey === process.env.ADMIN_SECRET_KEY);
+
+    if (secretKey !== process.env.ADMIN_SECRET_KEY) {
+      return sendError(res, 403, 'Invalid admin secret key');
+    }
+
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return sendError(res, 400, 'User already exists with this email');
+    }
+
+    const userId = generateIds.user();
+    
+    const user = await User.create({
+      userId,
+      name: username,
+      email,
+      password,
+      role: 'admin'
+    });
+
+    const token = generateToken(userId);
+    
+    sendSuccess(res, 'Admin registration successful', { 
+      user: { userId, name: username, email, role: 'admin' }, 
+      token 
+    }, 201);
+  } catch (error) {
+    sendError(res, 500, 'Admin registration failed', error);
+  }
+};
+
+module.exports = { login, register, getProfile, registerAdmin };

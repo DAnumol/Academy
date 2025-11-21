@@ -48,8 +48,18 @@ const createTimetable = async (req, res) => {
 const getAllTimetables = async (req, res) => {
   try {
     const { batchId } = req.query;
+    const { userId, role } = req.user;
     const where = {};
-    if (batchId) where.batchId = batchId;
+    
+    if (role === 'student') {
+      const { Student } = require('../models');
+      const student = await Student.findOne({ where: { userId } });
+      if (!student) return sendError(res, 404, 'Student not found');
+      where.batchId = student.batchId;
+      where.status = true;
+    } else {
+      if (batchId) where.batchId = batchId;
+    }
 
     const timetables = await Timetable.findAll({
       where,

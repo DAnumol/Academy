@@ -1,6 +1,13 @@
-const { Exam, QuestionPaper, Batch } = require('../models');
+const { Exam, QuestionPaper, Batch, Student, Result } = require('../models');
 const generateIds = require('../utils/generateId');
 const { sendSuccess, sendError } = require('../utils/response');
+
+const NEET_CONFIG = {
+  TOTAL_MARKS: 720,
+  TOTAL_QUESTIONS: 180,
+  MARKS_PER_CORRECT: 4,
+  MARKS_PER_INCORRECT: -1
+};
  
 const createExam = async (req, res) => {
   try {
@@ -24,9 +31,18 @@ const examStatus = status !== undefined ? Boolean(status) : true;
 const getAllExams = async (req, res) => {
   try {
     const { page = 1, limit = 10, batchId, status } = req.query;
+    const { userId, role } = req.user;
     const where = {};
-    if (batchId) where.batchId = batchId;
-    if (status) where.status = status;
+    
+    if (role === 'student') {
+      const student = await Student.findOne({ where: { userId } });
+      if (!student) return sendError(res, 404, 'Student not found');
+      where.batchId = student.batchId;
+      where.status = true;
+    } else {
+      if (batchId) where.batchId = batchId;
+      if (status) where.status = status;
+    }
  
     const exams = await Exam.findAndCountAll({
       where,
@@ -119,5 +135,94 @@ const toggleExamStatus = async (req, res) => {
   }
 };
  
-module.exports = { createExam, getAllExams, getExamById, updateExam, deleteExam, toggleExamStatus };
+const getStudentExams = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const student = await Student.findOne({ where: { userId } });
+    if (!student) return sendError(res, 404, 'Student not found');
+
+    const exams = await Exam.findAll({
+      where: { batchId: student.batchId, status: true },
+      include: [
+        { model: QuestionPaper, as: 'questionPaper', attributes: ['qpId', 'title', 'totalMarks', 'duration', 'questionSet'] },
+        { model: Batch, as: 'batch', attributes: ['batchName'] }
+      ],
+      order: [['date', 'DESC']]
+    });
+
+    const examsWithStatus = await Promise.all(exams.map(async (exam) => {
+      const result = await Result.findOne({ where: { examId: exam.examId, studentId: student.studentId } });
+      return {
+        ...exam.toJSON(),
+        attempted: !!result,
+        resultId: result?.resultId,
+        studentAnswers: result?.studentAnswers
+      };
+    }));
+
+    sendSuccess(res, 'Student exams retrieved successfully', examsWithStatus);
+  } catch (error) {
+    sendError(res, 500, 'Failed to get student exams', error);
+  }
+};
+
+const submitExam = async (req, res) => {
+  try {
+    const { examId, answers, violations } = req.body;
+    const { userId } = req.user;
+
+    const student = await Student.findOne({ where: { userId } });
+    if (!student) return sendError(res, 404, 'Student not found');
+
+    const exam = await Exam.findOne({
+      where: { examId },
+      include: [{ model: QuestionPaper, as: 'questionPaper' }]
+    });
+    if (!exam) return sendError(res, 404, 'Exam not found');
+
+    const existingResult = await Result.findOne({ where: { examId, studentId: student.studentId } });
+    if (existingResult) return sendError(res, 400, 'Exam already submitted');
+
+    const questionSet = exam.questionPaper.questionSet || [];
+    let obtainedMarks = 0;
+    let correctCount = 0;
+    let incorrectCount = 0;
+
+    questionSet.forEach((q) => {
+      const studentAnswer = answers[q.id];
+      if (studentAnswer) {
+        if (studentAnswer === q.correctAnswer) {
+          obtainedMarks += NEET_CONFIG.MARKS_PER_CORRECT;
+          correctCount++;
+        } else {
+          obtainedMarks += NEET_CONFIG.MARKS_PER_INCORRECT;
+          incorrectCount++;
+        }
+      }
+    });
+
+    const percentage = ((obtainedMarks / NEET_CONFIG.TOTAL_MARKS) * 100).toFixed(2);
+    const grade = percentage >= 90 ? 'A+' : percentage >= 80 ? 'A' : percentage >= 70 ? 'B' : percentage >= 60 ? 'C' : percentage >= 50 ? 'D' : 'F';
+
+    const result = await Result.create({
+      resultId: generateIds.result(),
+      studentId: student.studentId,
+      examId,
+      totalMarks: NEET_CONFIG.TOTAL_MARKS,
+      obtainedMarks,
+      percentage,
+      grade,
+      studentAnswers: answers,
+      violations: violations || [],
+      violationCount: violations ? violations.length : 0,
+      status: true
+    });
+
+    sendSuccess(res, 'Exam submitted successfully', result, 201);
+  } catch (error) {
+    sendError(res, 500, 'Failed to submit exam', error);
+  }
+};
+
+module.exports = { createExam, getAllExams, getExamById, updateExam, deleteExam, toggleExamStatus, getStudentExams, submitExam };
  

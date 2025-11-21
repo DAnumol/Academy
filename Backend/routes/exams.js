@@ -1,6 +1,6 @@
 const express = require('express');
 const { body } = require('express-validator');
-const { createExam, getAllExams, getExamById, updateExam, deleteExam, toggleExamStatus } = require('../controllers/examController');
+const { createExam, getAllExams, getExamById, updateExam, deleteExam, toggleExamStatus, getStudentExams, submitExam } = require('../controllers/examController');
 const { authenticate, authorize } = require('../middleware/auth');
  
 const router = express.Router();
@@ -13,6 +13,8 @@ const examValidation = [
  
 router.post('/', authenticate, authorize('admin'), examValidation, createExam);
 router.get('/', authenticate, getAllExams);
+router.get('/student/my-exams', authenticate, authorize('student'), getStudentExams);
+router.post('/student/submit', authenticate, authorize('student'), submitExam);
 router.get('/:id', authenticate, getExamById);
 router.put('/:id', authenticate, authorize('admin'), updateExam);
 router.delete('/:id', authenticate, authorize('admin'), deleteExam);

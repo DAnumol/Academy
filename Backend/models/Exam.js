@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     },
     qpId: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(200),
       allowNull: false,
       references: {
         model: 'questionpapers',

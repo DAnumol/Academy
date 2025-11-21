@@ -4,20 +4,16 @@ const { sendSuccess, sendError } = require('../utils/response');
 
 const getAdminDashboard = async (req, res) => {
   try {
-    const totalStudents = await Student.count({ where: { status: 'active' } });
-    const totalStaff = await Staff.count({ where: { status: 'active' } });
-    const totalCourses = await Course.count({ where: { status: 'active' } });
-    const totalBatches = await Batch.count({ where: { status: 'active' } });
+    const totalStudents = await Student.count({ where: { status: true } });
+    const totalStaff = await Staff.count({ where: { status: true } });
+    const totalCourses = await Course.count({ where: { status: true } });
+    const totalBatches = await Batch.count({ where: { status: true } });
+    const totalExams = await Exam.count({ where: { status: true } });
     
-    const upcomingExams = await Exam.findAll({
-      where: { status: 'scheduled' },
+    const recentStudents = await Student.findAll({
       limit: 5,
-      order: [['date', 'ASC']]
-    });
-
-    const recentAttendance = await Attendance.findAll({
-      limit: 10,
-      order: [['date', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      attributes: ['studentId', 'name', 'email', 'createdAt']
     });
 
     const stats = {
@@ -25,8 +21,8 @@ const getAdminDashboard = async (req, res) => {
       totalStaff,
       totalCourses,
       totalBatches,
-      upcomingExams,
-      recentAttendance
+      totalExams,
+      recentStudents
     };
 
     sendSuccess(res, 'Admin dashboard data retrieved successfully', stats);
@@ -37,28 +33,22 @@ const getAdminDashboard = async (req, res) => {
 
 const getStaffDashboard = async (req, res) => {
   try {
-    const staffId = req.user.staffProfile?.staffId;
+    const { userId } = req.user;
+    const staff = await Staff.findOne({ where: { userId } });
     
-    const assignedBatches = await Batch.findAll({
-      where: { staffIds: { [Op.contains]: [staffId] } }
-    });
+    if (!staff) return sendError(res, 404, 'Staff not found');
 
-    const pendingExams = await Exam.count({
-      where: { status: 'scheduled' }
-    });
-
-    const todayAttendance = await Attendance.count({
-      where: { 
-        markedBy: staffId,
-        date: new Date().toISOString().split('T')[0]
-      }
-    });
+    const totalStudents = await Student.count({ where: { status: true } });
+    const totalBatches = await Batch.count({ where: { status: true } });
+    const totalExams = await Exam.count({ where: { status: true } });
+    const totalCourses = await Course.count({ where: { status: true } });
 
     const stats = {
-      assignedBatches: assignedBatches.length,
-      pendingExams,
-      todayAttendance,
-      batches: assignedBatches
+      totalStudents,
+      totalBatches,
+      totalExams,
+      totalCourses,
+      staffName: staff.name
     };
 
     sendSuccess(res, 'Staff dashboard data retrieved successfully', stats);
@@ -69,30 +59,60 @@ const getStaffDashboard = async (req, res) => {
 
 const getStudentDashboard = async (req, res) => {
   try {
-    const studentId = req.user.studentProfile?.studentId;
+    const { userId } = req.user;
+    const student = await Student.findOne({ where: { userId } });
     
-    const upcomingExams = await Exam.findAll({
-      where: { status: 'scheduled' },
-      limit: 5,
-      order: [['date', 'ASC']]
+    if (!student) return sendError(res, 404, 'Student not found');
+
+    const { QuestionPaper, Material, Subject } = require('../models');
+
+    const totalExams = await Exam.count({ 
+      where: { batchId: student.batchId, status: true } 
+    });
+
+    const attemptedExams = await Result.count({
+      where: { studentId: student.studentId }
     });
 
     const recentResults = await Result.findAll({
-      where: { studentId },
+      where: { studentId: student.studentId },
       limit: 5,
-      order: [['createdAt', 'DESC']]
+      order: [['createdAt', 'DESC']],
+      attributes: ['resultId', 'obtainedMarks', 'totalMarks', 'percentage', 'grade', 'createdAt']
     });
 
-    const attendanceCount = await Attendance.count({
-      where: {
-        records: { [Op.contains]: [{ studentId, status: 'Present' }] }
-      }
+    const upcomingExams = await Exam.findAll({
+      where: { 
+        batchId: student.batchId, 
+        status: true,
+        date: { [Op.gte]: new Date() }
+      },
+      limit: 5,
+      order: [['date', 'ASC']],
+      include: [{ model: QuestionPaper, as: 'questionPaper', attributes: ['title', 'totalMarks', 'duration'] }]
     });
+
+    const latestMaterials = await Material.findAll({
+      where: { status: true },
+      limit: 5,
+      order: [['createdAt', 'DESC']],
+      include: [{ model: Subject, as: 'subject', attributes: ['name'] }],
+      attributes: ['materialId', 'title', 'description', 'fileUrl', 'createdAt']
+    });
+
+    const avgPercentage = recentResults.length > 0 
+      ? (recentResults.reduce((sum, r) => sum + parseFloat(r.percentage), 0) / recentResults.length).toFixed(2)
+      : 0;
 
     const stats = {
-      upcomingExams,
+      totalExams,
+      attemptedExams,
+      pendingExams: totalExams - attemptedExams,
+      avgPercentage,
       recentResults,
-      attendanceCount
+      upcomingExams,
+      latestMaterials,
+      studentName: student.name
     };
 
     sendSuccess(res, 'Student dashboard data retrieved successfully', stats);

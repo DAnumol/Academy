@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     studentId: {
-      type: DataTypes.STRING(10),
+      type: DataTypes.STRING(20),
       allowNull: false,
       references: {
         model: 'students',
@@ -40,6 +40,20 @@ module.exports = (sequelize, DataTypes) => {
     remarks: {
       type: DataTypes.TEXT,
       allowNull: true
+    },
+    studentAnswers: {
+      type: DataTypes.JSON,
+      allowNull: true
+    },
+    violations: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: []
+    },
+    violationCount: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0
     },
     status: {
        type: DataTypes.BOOLEAN,

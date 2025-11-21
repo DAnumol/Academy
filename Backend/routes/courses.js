@@ -8,6 +8,7 @@ const {
   deleteCourse 
 } = require('../controllers/courseController');
 const { authenticate, authorize } = require('../middleware/auth');
+const { checkPermission, PERMISSIONS } = require('../middleware/permissions');
 
 const router = express.Router();
 
@@ -21,30 +22,32 @@ const courseValidation = [
 // Routes
 router.post('/', 
   authenticate, 
-  authorize('admin'), 
+  checkPermission(PERMISSIONS.CREATE_COURSE), 
   courseValidation, 
   createCourse
 );
 
 router.get('/', 
   authenticate, 
+  checkPermission(PERMISSIONS.VIEW_COURSES), 
   getAllCourses
 );
 
 router.get('/:id', 
   authenticate, 
+  checkPermission(PERMISSIONS.VIEW_COURSES), 
   getCourseById
 );
 
 router.put('/:id', 
   authenticate, 
-  authorize('admin'), 
+  checkPermission(PERMISSIONS.EDIT_COURSE), 
   updateCourse
 );
 
 router.delete('/:id', 
   authenticate, 
-  authorize('admin'), 
+  checkPermission(PERMISSIONS.DELETE_COURSE), 
   deleteCourse
 );
 

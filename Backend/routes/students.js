@@ -8,6 +8,7 @@ const {
   deleteStudent 
 } = require('../controllers/studentController');
 const { authenticate, authorize } = require('../middleware/auth');
+const { checkPermission, PERMISSIONS } = require('../middleware/permissions');
 const upload = require('../middleware/upload');
 
 const router = express.Router();
@@ -25,7 +26,7 @@ const studentValidation = [
 // Routes
 router.post('/', 
   authenticate, 
-  authorize('admin'), 
+  checkPermission(PERMISSIONS.CREATE_STUDENT), 
   upload.single('profilePic'), 
   studentValidation, 
   createStudent
@@ -33,26 +34,26 @@ router.post('/',
 
 router.get('/', 
   authenticate, 
-  authorize('admin', 'staff'), 
+  checkPermission(PERMISSIONS.VIEW_STUDENTS), 
   getAllStudents
 );
 
 router.get('/:id', 
   authenticate, 
-  authorize('admin', 'staff', 'student'), 
+  checkPermission(PERMISSIONS.VIEW_STUDENTS), 
   getStudentById
 );
 
 router.put('/:id', 
   authenticate, 
-  authorize('admin'), 
+  checkPermission(PERMISSIONS.EDIT_STUDENT), 
   upload.single('profilePic'), 
   updateStudent
 );
 
 router.delete('/:id', 
   authenticate, 
-  authorize('admin'), 
+  checkPermission(PERMISSIONS.DELETE_STUDENT), 
   deleteStudent
 );
 

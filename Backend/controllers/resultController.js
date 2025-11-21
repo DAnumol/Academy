@@ -2,16 +2,27 @@ const { Result, Student, Exam, QuestionPaper } = require('../models');
 const generateIds = require('../utils/generateId');
 const { sendSuccess, sendError } = require('../utils/response');
 
+const NEET_CONFIG = {
+  TOTAL_MARKS: 720,
+  TOTAL_QUESTIONS: 180
+};
+
 const createResult = async (req, res) => {
   try {
-    const { studentId, examId, totalMarks, obtainedMarks, grade, remarks,status } = req.body;
-    const percentage = (obtainedMarks / totalMarks) * 100;
+    const { studentId, examId, obtainedMarks, grade, remarks, status } = req.body;
+    const percentage = (obtainedMarks / NEET_CONFIG.TOTAL_MARKS) * 100;
 
     const resultStatus = status !== undefined ? Boolean(status) : true;
 
     const result = await Result.create({
       resultId: generateIds.result(),
-      studentId, examId, totalMarks, obtainedMarks, percentage, grade, remarks,
+      studentId, 
+      examId, 
+      totalMarks: NEET_CONFIG.TOTAL_MARKS, 
+      obtainedMarks, 
+      percentage, 
+      grade, 
+      remarks,
       status: resultStatus
     });
 
@@ -70,8 +81,10 @@ const getResultById = async (req, res) => {
 const updateResult = async (req, res) => {
   try {
     const updateData = req.body;
-    if (updateData.obtainedMarks && updateData.totalMarks) {
-      updateData.percentage = (updateData.obtainedMarks / updateData.totalMarks) * 100;
+    updateData.totalMarks = NEET_CONFIG.TOTAL_MARKS;
+    
+    if (updateData.obtainedMarks) {
+      updateData.percentage = (updateData.obtainedMarks / NEET_CONFIG.TOTAL_MARKS) * 100;
     }
 
     const [updatedRowsCount] = await Result.update(updateData, {
@@ -102,4 +115,32 @@ const deleteResult = async (req, res) => {
   }
 };
 
-module.exports = { createResult, getAllResults, getResultById, updateResult, deleteResult };
+const getStudentResults = async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const student = await Student.findOne({ where: { userId } });
+    if (!student) return sendError(res, 404, 'Student not found');
+
+    const results = await Result.findAll({
+      where: { studentId: student.studentId },
+      include: [
+        { 
+          model: Exam, 
+          as: 'exam', 
+          include: [{ 
+            model: QuestionPaper, 
+            as: 'questionPaper', 
+            attributes: ['title', 'totalMarks'] 
+          }] 
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    sendSuccess(res, 'Student results retrieved successfully', results);
+  } catch (error) {
+    sendError(res, 500, 'Failed to get student results', error);
+  }
+};
+
+module.exports = { createResult, getAllResults, getResultById, updateResult, deleteResult, getStudentResults };
