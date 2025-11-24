@@ -22,14 +22,22 @@ export const questionpaperService = {
   create: async (questionpaperData) => {
     const formData = new FormData()
     
-    // Add all fields to FormData
     Object.keys(questionpaperData).forEach(key => {
       if (key === 'file' && questionpaperData[key]) {
-        // Handle file upload
         formData.append('questionPaper', questionpaperData[key])
       } else if (key === 'questionSet' && questionpaperData[key]) {
-        // Stringify questionSet array
-        formData.append(key, JSON.stringify(questionpaperData[key]))
+        const questionSet = JSON.parse(JSON.stringify(questionpaperData[key]))
+        
+        questionpaperData[key].forEach((q, index) => {
+          if (q.questionImage && q.questionImage instanceof File) {
+            formData.append(`questionImage${index}`, q.questionImage)
+            delete questionSet[index].questionImage
+          } else if (questionSet[index].questionImage === '') {
+            delete questionSet[index].questionImage
+          }
+        })
+        
+        formData.append(key, JSON.stringify(questionSet))
       } else if (questionpaperData[key] !== null && questionpaperData[key] !== undefined) {
         formData.append(key, questionpaperData[key])
       }
@@ -43,14 +51,22 @@ export const questionpaperService = {
   update: async (id, questionpaperData) => {
     const formData = new FormData()
     
-    // Add all fields to FormData
     Object.keys(questionpaperData).forEach(key => {
       if (key === 'file' && questionpaperData[key]) {
-        // Handle file upload
         formData.append('questionPaper', questionpaperData[key])
       } else if (key === 'questionSet' && questionpaperData[key]) {
-        // Stringify questionSet array
-        formData.append(key, JSON.stringify(questionpaperData[key]))
+        const questionSet = JSON.parse(JSON.stringify(questionpaperData[key]))
+        
+        questionpaperData[key].forEach((q, index) => {
+          if (q.questionImage && q.questionImage instanceof File) {
+            formData.append(`questionImage${index}`, q.questionImage)
+            delete questionSet[index].questionImage
+          } else if (questionSet[index].questionImage === '') {
+            delete questionSet[index].questionImage
+          }
+        })
+        
+        formData.append(key, JSON.stringify(questionSet))
       } else if (questionpaperData[key] !== null && questionpaperData[key] !== undefined) {
         formData.append(key, questionpaperData[key])
       }

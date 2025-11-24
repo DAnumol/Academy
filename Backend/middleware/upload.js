@@ -11,6 +11,8 @@ const storage = multer.diskStorage({
       uploadPath += 'questionpapers/';
     } else if (file.fieldname === 'material') {
       uploadPath += 'materials/';
+    } else if (file.fieldname.startsWith('questionImage')) {
+      uploadPath += 'questionpapers/images/';
     } else {
       uploadPath += 'others/';
     }
@@ -30,7 +32,13 @@ const fileFilter = (req, file, cb) => {
     material: /pdf|doc|docx|ppt|pptx|mp4|avi/
   };
   
-  const fileType = allowedTypes[file.fieldname] || /jpeg|jpg|png|pdf|doc|docx/;
+  let fileType;
+  if (file.fieldname.startsWith('questionImage')) {
+    fileType = /jpeg|jpg|png|gif/;
+  } else {
+    fileType = allowedTypes[file.fieldname] || /jpeg|jpg|png|pdf|doc|docx/;
+  }
+  
   const extname = fileType.test(path.extname(file.originalname).toLowerCase());
   const mimetype = fileType.test(file.mimetype);
   

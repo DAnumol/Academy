@@ -16,10 +16,10 @@ const questionPaperValidation = [
   body('duration').isNumeric().withMessage('Duration must be a number')
 ];
 
-router.post('/', authenticate, checkPermission(PERMISSIONS.CREATE_QUESTION_PAPER), upload.single('questionPaper'), questionPaperValidation, createQuestionPaper);
+router.post('/', authenticate, checkPermission(PERMISSIONS.CREATE_QUESTION_PAPER), upload.any(), questionPaperValidation, createQuestionPaper);
 router.get('/', authenticate, checkPermission(PERMISSIONS.VIEW_QUESTION_PAPERS), getAllQuestionPapers);
 router.get('/:id', authenticate, checkPermission(PERMISSIONS.VIEW_QUESTION_PAPERS), getQuestionPaperById);
-router.put('/:id', authenticate, checkPermission(PERMISSIONS.EDIT_QUESTION_PAPER), upload.single('questionPaper'), updateQuestionPaper);
+router.put('/:id', authenticate, checkPermission(PERMISSIONS.EDIT_QUESTION_PAPER), upload.any(), updateQuestionPaper);
 router.delete('/:id', authenticate, checkPermission(PERMISSIONS.DELETE_QUESTION_PAPER), deleteQuestionPaper);
 
 module.exports = router;

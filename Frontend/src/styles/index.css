@@ -1,5 +1,7 @@
+
 /* Import accessibility styles */
 @import './accessibility.css';
+@import './theme.css';
 
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
@@ -172,7 +174,7 @@ body {
   }
   
   .dark .card-hover {
-    @apply hover:shadow-2xl hover:shadow-primary-500/10;
+    @apply hover:shadow-2xl;
   }
   
   .card {

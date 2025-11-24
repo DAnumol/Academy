@@ -34,6 +34,7 @@ db.Material = require('./Material')(sequelize, Sequelize.DataTypes);
 db.Exam = require('./Exam')(sequelize, Sequelize.DataTypes);
 db.Result = require('./Result')(sequelize, Sequelize.DataTypes);
 db.Notification = require('./Notification')(sequelize, Sequelize.DataTypes);
+db.ThemePreference = require('./ThemePreference')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 Object.keys(db).forEach(modelName => {

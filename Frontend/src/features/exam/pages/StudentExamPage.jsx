@@ -58,7 +58,11 @@ const StudentExamPage = () => {
   }
 
   if (selectedExam) {
-    return <ExamAttempt exam={selectedExam} onComplete={handleExamComplete} />
+    return (
+      <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900 overflow-y-auto">
+        <ExamAttempt exam={selectedExam} onComplete={handleExamComplete} />
+      </div>
+    )
   }
 
   if (viewingAnswers) {

@@ -104,6 +104,17 @@ const GenericFormModal = ({
                     newCustomState[`${field.name}_${index}_${subField.name}`] = item[subField.name] || ['', '', '', '']
                   }
                 })
+                // Map question to questionText
+                if (item.question && !item.questionText) {
+                  item.questionText = item.question
+                }
+                // Map correctAnswer text to A/B/C/D
+                if (item.correctAnswer && item.options && typeof item.correctAnswer === 'string') {
+                  const answerIndex = item.options.findIndex(opt => opt === item.correctAnswer)
+                  if (answerIndex !== -1) {
+                    item.correctAnswer = String.fromCharCode(65 + answerIndex)
+                  }
+                }
               })
             }
           }
@@ -141,6 +152,11 @@ const GenericFormModal = ({
                 // Populate nested array fields for react-hook-form (filter out empty objects)
                 const filteredArray = arrayData.filter(item => item && Object.keys(item).length > 0)
                 filteredArray.forEach((item, index) => {
+                  if (item.question && !item.questionText) item.questionText = item.question
+                  if (item.correctAnswer && item.options && typeof item.correctAnswer === 'string') {
+                    const answerIndex = item.options.findIndex(opt => opt === item.correctAnswer)
+                    if (answerIndex !== -1) item.correctAnswer = String.fromCharCode(65 + answerIndex)
+                  }
                   field.fields?.forEach(subField => {
                     const subFieldName = `${field.name}[${index}].${subField.name}`
                     formData[subFieldName] = item[subField.name] || ''
@@ -366,10 +382,22 @@ const GenericFormModal = ({
         data.avatar = customState.avatar
       }
       
-      // Only use customState for array fields if no form data was processed
+      // Merge customState array fields with form data to preserve File objects
       fields.forEach(field => {
         if (field.type === 'array' && customState[field.name] && customState[field.name].length > 0) {
-          if (!data[field.name]) {
+          if (data[field.name]) {
+            // Merge File objects from customState into form data
+            data[field.name].forEach((item, index) => {
+              if (customState[field.name][index]) {
+                // Copy File objects (like questionImage) from customState
+                Object.keys(customState[field.name][index]).forEach(key => {
+                  if (customState[field.name][index][key] instanceof File) {
+                    item[key] = customState[field.name][index][key]
+                  }
+                })
+              }
+            })
+          } else {
             const hasData = customState[field.name].some(item => Object.keys(item).length > 0)
             if (hasData) {
               data[field.name] = customState[field.name]
@@ -381,6 +409,13 @@ const GenericFormModal = ({
       const submitData = data
       console.log('Final form submission data:', submitData)
       console.log('CustomState at submission:', customState)
+      
+      // Debug: Check if File objects are present in questionSet
+      if (submitData.questionSet) {
+        submitData.questionSet.forEach((q, i) => {
+          console.log(`Question ${i} - questionImage type:`, q.questionImage instanceof File ? 'File' : typeof q.questionImage, q.questionImage)
+        })
+      }
       
       await onSubmit(submitData)
       handleClose()
@@ -711,6 +746,11 @@ const GenericFormModal = ({
       const hasExistingFile = isEditMode && existingFileUrl
       const isConditional = field.conditionalRequired
       
+      // In edit mode, show indicator if this field has data
+      if (isEditMode && isConditional && !inputMode && hasExistingFile) {
+        setInputMode(name)
+      }
+      
       // Hide if user selected the other option
       if (isConditional && inputMode && inputMode !== name) {
         return null
@@ -721,6 +761,9 @@ const GenericFormModal = ({
           <div className="flex justify-between items-center">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {label} {required && !hasExistingFile && <span className="text-red-500">*</span>}
+              {isEditMode && inputMode === name && hasExistingFile && (
+                <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Active</span>
+              )}
             </label>
             {isConditional && !inputMode && (
               <button
@@ -904,6 +947,53 @@ const GenericFormModal = ({
       )
     }
 
+    // Image upload field (for question images)
+    if (type === 'image') {
+      const imagePreview = customState[`${name}_preview`]
+      
+      return (
+        <div key={name} className="w-full space-y-2">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {label} {required && <span className="text-red-500">*</span>}
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="file"
+              accept={field.accept || 'image/*'}
+              className="hidden"
+              id={`${name}-upload`}
+              {...register(name)}
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  const file = e.target.files[0]
+                  const reader = new FileReader()
+                  reader.onload = (event) => {
+                    setCustomState(prev => ({ ...prev, [`${name}_preview`]: event.target.result, [name]: file }))
+                  }
+                  reader.readAsDataURL(file)
+                }
+              }}
+            />
+            <label
+              htmlFor={`${name}-upload`}
+              className="px-4 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 cursor-pointer text-sm flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Choose Image
+            </label>
+            {imagePreview && (
+              <img src={imagePreview} alt="Preview" className="h-12 w-12 object-cover rounded border" />
+            )}
+          </div>
+          {errors[name] && (
+            <p className="text-sm text-red-500">{errors[name].message}</p>
+          )}
+        </div>
+      )
+    }
+
     // Array text field (standalone multiple text inputs)
     if (type === 'arrayText') {
       const arrayValues = customState[name] || ['', '', '', '']
@@ -941,6 +1031,12 @@ const GenericFormModal = ({
     if (type === 'array') {
       const arrayItems = customState[name] || [{}]
       const isConditional = field.conditionalRequired
+      const hasData = arrayItems.length > 0 && arrayItems.some(item => Object.keys(item).length > 0)
+      
+      // In edit mode, show indicator if this field has data
+      if (isEditMode && isConditional && !inputMode && hasData) {
+        setInputMode(name)
+      }
       
       // Hide if user selected the other option
       if (isConditional && inputMode && inputMode !== name) {
@@ -966,6 +1062,9 @@ const GenericFormModal = ({
           <div className="flex justify-between items-center">
             <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               {label} {required && <span className="text-red-500">*</span>}
+              {isEditMode && inputMode === name && hasData && (
+                <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded">Active</span>
+              )}
             </label>
             <div className="flex gap-2">
               {isConditional && !inputMode && (
@@ -1007,6 +1106,83 @@ const GenericFormModal = ({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {field.fields?.map((subField) => {
                   const subFieldName = `${name}[${index}].${subField.name}`
+                  
+                  if (subField.type === 'image') {
+                    const existingImageUrl = arrayItems[index]?.imageUrl
+                    const baseUrl = import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000'
+                    const fullImageUrl = existingImageUrl && !existingImageUrl.startsWith('http') && !existingImageUrl.startsWith('data:') 
+                      ? `${baseUrl}${existingImageUrl}` 
+                      : existingImageUrl
+                    const imagePreview = customState[`${name}_${index}_${subField.name}_preview`] || fullImageUrl
+                    
+                    return (
+                      <div key={subField.name} className="space-y-2 md:col-span-2">
+                        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          {subField.label}
+                        </label>
+                        <div className="flex items-center gap-3">
+                          <input
+                            type="file"
+                            accept={subField.accept || 'image/*'}
+                            className="hidden"
+                            id={`${name}-${index}-${subField.name}-upload`}
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                const file = e.target.files[0]
+                                const reader = new FileReader()
+                                reader.onload = (event) => {
+                                  setCustomState(prev => ({ 
+                                    ...prev, 
+                                    [`${name}_${index}_${subField.name}_preview`]: event.target.result
+                                  }))
+                                  const newItems = [...arrayItems]
+                                  if (!newItems[index]) newItems[index] = {}
+                                  newItems[index][subField.name] = file
+                                  setCustomState(prev => ({ ...prev, [name]: newItems }))
+                                }
+                                reader.readAsDataURL(file)
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={`${name}-${index}-${subField.name}-upload`}
+                            className="px-3 py-2 bg-primary-500 text-white rounded-md hover:bg-primary-600 cursor-pointer text-sm flex items-center gap-2"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            {imagePreview ? 'Change Image' : 'Add Image'}
+                          </label>
+                          {imagePreview && (
+                            <div className="relative">
+                              <img src={imagePreview} alt="Preview" className="h-16 w-16 object-cover rounded border" />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setCustomState(prev => {
+                                    const newState = { ...prev }
+                                    delete newState[`${name}_${index}_${subField.name}_preview`]
+                                    return newState
+                                  })
+                                  const newItems = [...arrayItems]
+                                  if (newItems[index]) {
+                                    delete newItems[index][subField.name]
+                                    delete newItems[index].imageUrl
+                                  }
+                                  setCustomState(prev => ({ ...prev, [name]: newItems }))
+                                }}
+                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                              >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  }
                   
                   if (subField.type === 'arrayText') {
                     const options = customState[`${name}_${index}_options`] || ['', '', '', '']
@@ -1052,11 +1228,10 @@ const GenericFormModal = ({
                       {subField.type === 'select' ? (
                         <select
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                          value={watch(subFieldName) || ''}
+                          value={watch(subFieldName) || arrayItems[index]?.[subField.name] || ''}
                           {...register(subFieldName)}
                           onChange={(e) => {
                             setValue(subFieldName, e.target.value)
-                            // Update customState as well
                             const newItems = [...arrayItems]
                             if (!newItems[index]) newItems[index] = {}
                             newItems[index][subField.name] = e.target.value
@@ -1074,11 +1249,11 @@ const GenericFormModal = ({
                         <input
                           type={subField.type}
                           placeholder={subField.placeholder}
+                          value={watch(subFieldName) || arrayItems[index]?.[subField.name] || ''}
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                           {...register(subFieldName)}
                           onChange={(e) => {
                             setValue(subFieldName, e.target.value)
-                            // Update customState as well
                             const newItems = [...arrayItems]
                             if (!newItems[index]) newItems[index] = {}
                             newItems[index][subField.name] = e.target.value

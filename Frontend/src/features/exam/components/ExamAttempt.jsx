@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Clock, AlertTriangle, CheckCircle, Shield } from 'lucide-react'
+import { Clock, AlertTriangle, CheckCircle, Shield, ZoomIn, X } from 'lucide-react'
 import { examService } from '@/services/examService'
 import { showToast } from '@/utils/toast'
 import { NEET_CONFIG } from '@/config/neetConfig'
@@ -12,7 +12,10 @@ const ExamAttempt = ({ exam, onComplete }) => {
   const [showConfirm, setShowConfirm] = useState(false)
   const [violations, setViolations] = useState([])
   const [examEnded, setExamEnded] = useState(false)
+  const [fullscreenImage, setFullscreenImage] = useState(null)
   const timerRef = useRef(null)
+  const answersRef = useRef({})
+  const submittedRef = useRef(false)
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -101,6 +104,8 @@ const ExamAttempt = ({ exam, onComplete }) => {
   }, [examEnded])
 
   const handleAutoSubmit = async () => {
+    if (submittedRef.current) return
+    submittedRef.current = true
     if (timerRef.current) clearInterval(timerRef.current)
     setExamEnded(true)
     await submitExam()
@@ -110,9 +115,10 @@ const ExamAttempt = ({ exam, onComplete }) => {
   }
 
   const submitExam = async () => {
+    if (submittedRef.current && submitting) return
     try {
       setSubmitting(true)
-      await examService.submit(exam.examId, answers, violations)
+      await examService.submit(exam.examId, answersRef.current, violations)
       showToast.success('Exam submitted successfully')
       onComplete()
     } catch (error) {
@@ -127,6 +133,8 @@ const ExamAttempt = ({ exam, onComplete }) => {
   }
 
   const confirmSubmit = () => {
+    if (submittedRef.current) return
+    submittedRef.current = true
     if (timerRef.current) clearInterval(timerRef.current)
     setExamEnded(true)
     submitExam()
@@ -136,7 +144,11 @@ const ExamAttempt = ({ exam, onComplete }) => {
   }
 
   const handleAnswerChange = (questionId, answer) => {
-    setAnswers((prev) => ({ ...prev, [questionId]: answer }))
+    setAnswers((prev) => {
+      const updated = { ...prev, [questionId]: answer }
+      answersRef.current = updated
+      return updated
+    })
   }
 
   const formatTime = (seconds) => {
@@ -205,6 +217,21 @@ const ExamAttempt = ({ exam, onComplete }) => {
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     {question.question}
                   </h3>
+                  {question.imageUrl && (
+                    <div className="mb-4 relative inline-block">
+                      <img 
+                        src={`${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000'}${question.imageUrl}`} 
+                        alt="Question" 
+                        className="max-w-xs h-32 object-contain rounded-lg border shadow-sm"
+                      />
+                      <button
+                        onClick={() => setFullscreenImage(`${import.meta.env.VITE_API_BASE_URL?.replace('/api', '') || 'http://localhost:5000'}${question.imageUrl}`)}
+                        className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full shadow-lg"
+                      >
+                        <ZoomIn className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                   <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                     Marks: {question.marks}
                   </div>
@@ -249,6 +276,24 @@ const ExamAttempt = ({ exam, onComplete }) => {
           ))}
         </div>
       </div>
+
+      {/* Fullscreen Image Modal */}
+      {fullscreenImage && (
+        <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50" onClick={() => setFullscreenImage(null)}>
+          <button
+            onClick={() => setFullscreenImage(null)}
+            className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white p-3 rounded-full shadow-lg"
+          >
+            <X className="h-6 w-6" />
+          </button>
+          <img 
+            src={fullscreenImage} 
+            alt="Fullscreen" 
+            className="max-w-[90%] max-h-[90%] object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       {/* Confirmation Modal */}
       {showConfirm && (

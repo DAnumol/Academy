@@ -1357,6 +1357,13 @@ export const questionPaperFormConfig = {
           required: true
         },
         {
+          name: 'questionImage',
+          label: 'Question Image (Optional)',
+          type: 'image',
+          accept: 'image/*',
+          required: false
+        },
+        {
           name: 'options',
           label: 'Options',
           type: 'arrayText', // array of text fields

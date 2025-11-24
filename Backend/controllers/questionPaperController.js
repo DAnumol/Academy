@@ -9,7 +9,7 @@ const NEET_CONFIG = {
   MARKS_PER_INCORRECT: -1
 };
 
-const transformQuestionSet = (questionSet) => {
+const transformQuestionSet = (questionSet, imageUrls = {}) => {
   if (!questionSet || !Array.isArray(questionSet)) return null;
   
   return questionSet.map((q, index) => ({
@@ -18,7 +18,8 @@ const transformQuestionSet = (questionSet) => {
     type: 'mcq',
     options: q.options || [],
     correctAnswer: q.options && q.correctAnswer ? q.options[q.correctAnswer.charCodeAt(0) - 65] : q.correctAnswer,
-    marks: NEET_CONFIG.MARKS_PER_CORRECT
+    marks: NEET_CONFIG.MARKS_PER_CORRECT,
+    imageUrl: imageUrls[index] || q.imageUrl || null
   }));
 };
 
@@ -36,16 +37,35 @@ const createQuestionPaper = async (req, res) => {
       }
     }
     
-    if (parsedQuestionSet && Array.isArray(parsedQuestionSet) && parsedQuestionSet.length > 0) {
-      if (parsedQuestionSet.length !== NEET_CONFIG.TOTAL_QUESTIONS) {
-        return sendError(res, 400, `Question paper must have exactly ${NEET_CONFIG.TOTAL_QUESTIONS} questions`);
-      }
+    // if (parsedQuestionSet && Array.isArray(parsedQuestionSet) && parsedQuestionSet.length > 0) {
+    //   if (parsedQuestionSet.length !== NEET_CONFIG.TOTAL_QUESTIONS) {
+    //     return sendError(res, 400, `Question paper must have exactly ${NEET_CONFIG.TOTAL_QUESTIONS} questions`);
+    //   }
+    // }
+    
+    const imageUrls = {};
+    if (req.files && Array.isArray(req.files)) {
+      req.files.forEach(file => {
+        if (file.fieldname.startsWith('questionImage')) {
+          const index = parseInt(file.fieldname.replace('questionImage', ''));
+          const filePath = file.path.replace(/\\/g, '/');
+          imageUrls[index] = filePath.startsWith('uploads/') ? `/${filePath}` : `/uploads/${filePath}`;
+        }
+      });
     }
     
-    const transformedQuestionSet = transformQuestionSet(parsedQuestionSet);
+    const transformedQuestionSet = transformQuestionSet(parsedQuestionSet, imageUrls);
 
     const questionPaperStatus = status !== undefined ? Boolean(status) : true;
-    const fileUrl = req.file ? `/uploads/${req.file.path.replace(/\\/g, '/')}` : null;
+    
+    // Handle file URL for main question paper file
+    let fileUrl = null;
+    if (req.files && Array.isArray(req.files)) {
+      const questionPaperFile = req.files.find(f => f.fieldname === 'questionPaper');
+      if (questionPaperFile) {
+        fileUrl = `/uploads/${questionPaperFile.path.replace(/\\/g, '/')}`;
+      }
+    }
     const questionPaper = await QuestionPaper.create({
       qpId: generateIds.questionPaper(),
       courseId, 
@@ -116,7 +136,14 @@ const getQuestionPaperById = async (req, res) => {
 const updateQuestionPaper = async (req, res) => {
   try {
     const updateData = req.body;
-    if (req.file) updateData.fileUrl = `/uploads/${req.file.path.replace(/\\/g, '/')}`;
+    
+    // Handle file URL for main question paper file
+    if (req.files && Array.isArray(req.files)) {
+      const questionPaperFile = req.files.find(f => f.fieldname === 'questionPaper');
+      if (questionPaperFile) {
+        updateData.fileUrl = `/uploads/${questionPaperFile.path.replace(/\\/g, '/')}`;
+      }
+    }
     
     if (updateData.questionSet && typeof updateData.questionSet === 'string') {
       try {
@@ -127,10 +154,22 @@ const updateQuestionPaper = async (req, res) => {
     }
     
     if (updateData.questionSet && Array.isArray(updateData.questionSet) && updateData.questionSet.length > 0) {
-      if (updateData.questionSet.length !== NEET_CONFIG.TOTAL_QUESTIONS) {
-        return sendError(res, 400, `Question paper must have exactly ${NEET_CONFIG.TOTAL_QUESTIONS} questions`);
+      // if (updateData.questionSet.length !== NEET_CONFIG.TOTAL_QUESTIONS) {
+      //   return sendError(res, 400, `Question paper must have exactly ${NEET_CONFIG.TOTAL_QUESTIONS} questions`);
+      // }
+      
+      const imageUrls = {};
+      if (req.files && Array.isArray(req.files)) {
+        req.files.forEach(file => {
+          if (file.fieldname.startsWith('questionImage')) {
+            const index = parseInt(file.fieldname.replace('questionImage', ''));
+            const filePath = file.path.replace(/\\/g, '/');
+            imageUrls[index] = filePath.startsWith('uploads/') ? `/${filePath}` : `/uploads/${filePath}`;
+          }
+        });
       }
-      updateData.questionSet = transformQuestionSet(updateData.questionSet);
+      
+      updateData.questionSet = transformQuestionSet(updateData.questionSet, imageUrls);
     }
     
     updateData.totalMarks = NEET_CONFIG.TOTAL_MARKS;

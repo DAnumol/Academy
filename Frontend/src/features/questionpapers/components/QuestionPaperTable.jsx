@@ -124,7 +124,8 @@ const QuestionPaperTable = () => {
             <div class="questions">
               ${qp.questionSet && Array.isArray(qp.questionSet) ? qp.questionSet.map((q, idx) => `
                 <div class="question">
-                  <div class="question-number">Q${idx + 1}. ${q.questionText}</div>
+                  <div class="question-number">Q${idx + 1}. ${q.questionText || q.question}</div>
+                  ${q.imageUrl ? `<img src="${window.location.origin}${q.imageUrl}" alt="Question ${idx + 1}" style="max-width: 400px; margin: 10px 0; border-radius: 4px;" />` : ''}
                   ${q.options && Array.isArray(q.options) ? `
                     <div class="options">
                       ${q.options.map((opt, i) => `

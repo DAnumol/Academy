@@ -44,7 +44,9 @@ const DashboardPage = () => {
         <StatsCard className="stat-card" title="Total Staff" value={dashboardData?.totalStaff || 0} icon={GraduationCap} />
         <StatsCard className="stat-card" title="Total Courses" value={dashboardData?.totalCourses || 0} icon={BookOpen} />
         <StatsCard className="stat-card" title="Total Batches" value={dashboardData?.totalBatches || 0} icon={ClipboardList} />
+            {/* <StatsCard className="stat-card" title="Total Exams" value={dashboardData?.totalExams || 0} icon={ClipboardList} /> */}
       </div>
+      
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-md">
         <h3 className="text-lg font-semibold mb-4">Recent Students</h3>
         <div className="space-y-2">
@@ -56,6 +58,7 @@ const DashboardPage = () => {
           ))}
         </div>
       </div>
+      
     </>
   )
 
