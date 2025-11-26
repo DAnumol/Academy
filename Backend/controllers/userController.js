@@ -4,11 +4,14 @@ const { sendSuccess, sendError } = require('../utils/response');
 // Get all users
 const getAllUsers = async (req, res) => {
   try {
-    const { role } = req.query;
+    const { role, status } = req.query;
     
     const whereClause = {};
     if (role) {
       whereClause.role = role;
+    }
+    if (status !== undefined) {
+      whereClause.status = status === 'true' || status === true;
     }
 
     const users = await db.User.findAll({
@@ -151,10 +154,9 @@ const updateUser = async (req, res) => {
       status: status !== undefined ? status : user.status
     };
 
-    // Only update password if provided
+    // Only update password if provided (model hook will hash it)
     if (password && password.trim() !== '') {
-      const bcrypt = require('bcryptjs');
-      updateData.password = await bcrypt.hash(password, 10);
+      updateData.password = password;
     }
 
     await user.update(updateData);

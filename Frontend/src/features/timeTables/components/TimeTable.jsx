@@ -79,33 +79,23 @@ const TimeTable = () => {
 
 
   const handleFormSubmit = async (data) => {
+    console.log('Form submit data:', data)
+    console.log('Schedule in submit:', data.schedule)
+    
     const submitData = {
       batchId: data.batchId,
       weekStartDate: data.weekStartDate,
-      schedule: data.schedule || [],
-      status: data.status !== undefined ? data.status : true
+      schedule: Array.isArray(data.schedule) ? data.schedule : [],
+      status: data.status === 'true' || data.status === true
     }
     
-    console.log('Submit data:', submitData)
-    console.log('Schedule data:', JSON.stringify(submitData.schedule, null, 2))
+    console.log('Processed submit data:', submitData)
     
-    try {
-      if (showEditModal && selectedUser) {
-        const timetableId = selectedUser.timetableId || selectedUser.id
-        console.log('Updating timetable ID:', timetableId)
-        
-        const result = await updateMutation.mutateAsync({ id: timetableId, ...submitData })
-        console.log('Update result:', result)
-      } else {
-        await createMutation.mutateAsync(submitData)
-      }
-      
-      setShowAddModal(false)
-      setShowEditModal(false)
-      setSelectedUser(null)
-    } catch (error) {
-      console.error('Submit error:', error)
-      throw error
+    if (showEditModal && selectedUser) {
+      const timetableId = selectedUser.timetableId || selectedUser.id
+      await updateMutation.mutateAsync({ id: timetableId, ...submitData })
+    } else {
+      await createMutation.mutateAsync(submitData)
     }
   }
 

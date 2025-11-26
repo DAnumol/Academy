@@ -598,7 +598,19 @@ export const studentFormConfig = {
       section: 'profile',
       sectionTitle: 'Profile Photo'
     },
- 
+  {
+      name: 'userId',
+      label: 'User ID',
+      type: 'select',
+      placeholder: 'Select User ID',
+     
+      section: 'basic',
+      sectionTitle: 'Student Details',
+      apiEndpoint: '/users',
+      valueField: 'userId',
+      labelField: 'name',
+      onChange: 'populateUserFields'
+    },
     {
       name: 'name',
       label: 'Full Name',
@@ -606,8 +618,8 @@ export const studentFormConfig = {
       placeholder: 'Enter full name',
       required: true,
       section: 'basic',
-      sectionTitle: 'Student Details',
-      disableWhenEmpty: 'userId',
+      // sectionTitle: 'Student Details',
+       disabled: true,
       validation: {
         minLength: {
           value: 2,
@@ -650,7 +662,7 @@ export const studentFormConfig = {
       placeholder: 'Enter email address',
       required: true,
       section: 'basic',
-      disableWhenEmpty: 'userId',
+      disabled: true,
       validation: {
         pattern: {
           value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -668,24 +680,14 @@ export const studentFormConfig = {
       section: 'basic'
     },
     // Academic section
-    {
-      name: 'userId',
-      label: 'User ID',
-      type: 'select',
-      placeholder: 'Select User ID',
-      section: 'academic',
-      sectionTitle: 'Academic Details',
-      apiEndpoint: '/users',
-      valueField: 'userId',
-      labelField: 'name',
-      onChange: 'populateUserFields'
-    },
+   
     {
       name: 'batchId',
       label: 'Batch',
       type: 'select',
       placeholder: 'Select Batch',
       section: 'academic',
+       sectionTitle: 'Academic Details',
       apiEndpoint: '/batches',
       valueField: 'batchId',
       labelField: 'batchName'
@@ -921,6 +923,19 @@ export const staffFormConfig = {
     },
 
     // Basic Information Section
+     {
+      name: 'userId',
+      label: 'User',
+      type: 'select',
+      placeholder: 'Select user',
+      required: true,
+        section: 'basic',
+      sectionTitle: 'Basic Information',
+      apiEndpoint: '/users?role=staff',
+      valueField: 'userId',
+      labelField: 'name',
+      onChange: 'populateUserFields'
+    },
     {
       name: 'name',
       label: 'Staff Name',
@@ -928,7 +943,7 @@ export const staffFormConfig = {
       placeholder: 'Enter staff name',
       required: true,
       section: 'basic',
-      sectionTitle: 'Basic Information',
+      // sectionTitle: 'Basic Information',
        disabled: true
     },
 
@@ -1003,19 +1018,7 @@ export const staffFormConfig = {
     },
 
     // Assignment Section
-    {
-      name: 'userId',
-      label: 'User',
-      type: 'select',
-      placeholder: 'Select user',
-      required: true,
-      section: 'assignment',
-      sectionTitle: 'Assignment & Status',
-      apiEndpoint: '/users?role=staff',
-      valueField: 'userId',
-      labelField: 'displayName',
-      onChange: 'populateUserFields'
-    },
+   
     // {
     //   name: 'name',
     //   label: 'Name',
@@ -1064,7 +1067,7 @@ export const staffFormConfig = {
       type: 'select',
       placeholder: 'Select status',
       section: 'assignment',
-
+ sectionTitle: 'Status',
       options: [
         { value: true, label: 'Active' },
         { value: false, label: 'Inactive' }

@@ -74,9 +74,15 @@ const fetchLookupData = async (type, ids) => {
         } else if (type === 'subjects') {
           id = item.subjectId || item.id
           name = item.name || item.subjectName
+        } else if (type === 'batches') {
+          id = item.batchId || item.id
+          name = item.batchName || item.name
+        } else if (type === 'courses') {
+          id = item.courseId || item.id
+          name = item.courseName || item.name
         } else {
-          id = item.id || item.courseId || item.batchId
-          name = item.name || item.courseName || item.batchName
+          id = item.id
+          name = item.name
         }
         
         if (id && name) {

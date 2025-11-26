@@ -30,19 +30,18 @@ export const userTableConfig = {
       getBadgeColor: getStatusColor
     }
   ],
-  searchFields: ['name', 'email'],
+  searchFields: ['name', 'role'],
   statusField: 'status',
   filterConfig: {
     status: [
-      { value: 'Active', label: 'Active', selected: false },
-      { value: 'Inactive', label: 'Inactive', selected: false },
-      { value: 'Pending', label: 'Pending', selected: false }
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
     ],
     role: [
-      { value: 'Admin', label: 'Admin', selected: false },
-      { value: 'Staff', label: 'Staff', selected: false },
-      { value: 'Student', label: 'Student', selected: false }
-    ],
+      { value: 'admin', label: 'Admin', selected: false },
+      { value: 'staff', label: 'Staff', selected: false },
+      { value: 'student', label: 'Student', selected: false }
+    ]
   }
 }
 
@@ -50,20 +49,15 @@ export const staffTableConfig = {
   title: 'Staff Management',
   description: 'Manage and track your staff members',
   columns: [
-    {
-      key: 'staffId',
-      label: 'Staff ID'
-    },
+    // {
+    //   key: 'staffId',
+    //   label: 'Staff ID'
+    // },
     {
       key: 'name',
       label: 'Staff Name'
     },
-    {
-      key: 'status',
-      label: 'Status',
-      type: 'badge',
-      getBadgeColor: getStatusColor
-    },
+    
     {
       key: 'phone',
       label: 'Phone Number'
@@ -75,16 +69,21 @@ export const staffTableConfig = {
     {
       key: 'qualification',
       label: 'Qualification'
-    }
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'badge',
+      getBadgeColor: getStatusColor
+    },
   ],
   searchFields: ['name', 'email', 'qualification'],
   statusField: 'status',
   filterConfig: {
     status: [
-      { value: 'active', label: 'Active', selected: false },
-      { value: 'inactive', label: 'Inactive', selected: false },
-      { value: 'on-leave', label: 'On Leave', selected: false }
-    ]
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
+    ],
   }
 }
 
@@ -120,10 +119,9 @@ export const studentTableConfig = {
   statusField: 'status',
   filterConfig: {
     status: [
-      { value: 'Active', label: 'Active', selected: false },
-      { value: 'Inactive', label: 'Inactive', selected: false },
-      { value: 'Pending', label: 'Pending', selected: false }
-    ]
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
+    ],
   }
 }
 
@@ -133,7 +131,10 @@ export const timetableTableConfig = {
   columns: [
     {
       key: 'batchId',
-      label: 'Batch ID'
+      label: 'Batch',
+      render: (value, item) => {
+        return value ? React.createElement(LookupCell, { ids: value, type: 'batch' }) : 'N/A'
+      }
     },
     {
       key: 'weekStartDate',
@@ -141,25 +142,37 @@ export const timetableTableConfig = {
     },
     {
       key: 'schedule',
-      label: 'Schedule Details',
+      label: 'Weekly Schedule',
       render: (value, item) => {
         if (!value || !Array.isArray(value) || value.length === 0) {
           return React.createElement('span', { className: 'text-gray-500 italic' }, 'No schedule')
         }
         
-        return React.createElement('div', { className: 'space-y-1' }, 
-          value.map((scheduleItem, index) => 
+        return React.createElement('div', { className: 'grid grid-cols-2 gap-2 min-w-[400px]' }, 
+          value.slice(0, 4).map((scheduleItem, index) => 
             React.createElement('div', 
               { 
                 key: index, 
-                className: 'text-xs flex items-center gap-1' 
+                className: 'bg-gradient-to-br from-primary-50 to-secondary-50 dark:from-gray-700 dark:to-gray-800 rounded-lg p-2 border border-primary-200 dark:border-gray-600' 
               },
-              React.createElement('span', { className: 'font-medium' }, `${scheduleItem.day}:`),
-              React.createElement(LookupCell, { ids: scheduleItem.subjectId, type: 'subject' }),
-              React.createElement('span', null, `(${scheduleItem.startTime}-${scheduleItem.endTime})`),
-              React.createElement(LookupCell, { ids: scheduleItem.staffId, type: 'staff' }),
-              React.createElement('span', null, `Room ${scheduleItem.roomNo}`)
+              React.createElement('div', { className: 'flex items-center justify-between mb-1' },
+                React.createElement('span', { className: 'text-xs font-bold text-primary-700 dark:text-primary-300' }, scheduleItem.day),
+                React.createElement('span', { className: 'text-xs text-gray-600 dark:text-gray-400' }, `Room ${scheduleItem.roomNo}`)
+              ),
+              React.createElement('div', { className: 'text-xs font-medium text-gray-800 dark:text-gray-200 mb-1' },
+                React.createElement(LookupCell, { ids: scheduleItem.subjectId, type: 'subject' })
+              ),
+              React.createElement('div', { className: 'text-xs text-gray-600 dark:text-gray-400' },
+                `${scheduleItem.startTime} - ${scheduleItem.endTime}`
+              ),
+              React.createElement('div', { className: 'text-xs text-gray-500 dark:text-gray-500 mt-1' },
+                React.createElement(LookupCell, { ids: scheduleItem.staffId, type: 'staff' })
+              )
             )
+          ),
+          value.length > 4 && React.createElement('div', 
+            { className: 'col-span-2 text-center text-xs text-gray-500 italic py-1' },
+            `+${value.length - 4} more classes`
           )
         )
       }
@@ -175,10 +188,9 @@ export const timetableTableConfig = {
   statusField: 'status',
   filterConfig: {
     status: [
-      { value: 'Active', label: 'Active', selected: false },
-      { value: 'Inactive', label: 'Inactive', selected: false },
-      { value: 'Draft', label: 'Draft', selected: false }
-    ]
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
+    ],
   }
 }
 
@@ -261,11 +273,10 @@ export const resultTableConfig = {
   searchFields: ['studentId', 'examId'],
   statusField: 'status',
   filterConfig: {
-    status: [
-      { value: 'Published', label: 'Published', selected: false },
-      { value: 'Pending', label: 'Pending', selected: false },
-      { value: 'On Hold', label: 'On Hold', selected: false }
-    ]
+  status: [
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
+    ],
   }
 }
 
@@ -296,10 +307,9 @@ export const courseTableConfig = {
   statusField: 'status',
   filterConfig: {
     status: [
-      { value: 'Active', label: 'Active', selected: false },
-      { value: 'Inactive', label: 'Inactive', selected: false },
-      { value: 'Pending', label: 'Pending', selected: false }
-    ]
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
+    ],
   }
 }
 
@@ -313,7 +323,10 @@ export const batchTableConfig = {
     },
     {
       key: 'courseId',
-      label: 'Course ID'
+      label: 'Course',
+      render: (value, item) => {
+        return value ? React.createElement(LookupCell, { ids: value, type: 'course' }) : 'N/A'
+      }
     },
     {
       key: 'startDate',
@@ -333,11 +346,10 @@ export const batchTableConfig = {
   searchFields: ['batchName'],
   statusField: 'status',
   filterConfig: {
-    status: [
-      { value: 'Active', label: 'Active', selected: false },
-      { value: 'Inactive', label: 'Inactive', selected: false },
-      { value: 'Pending', label: 'Pending', selected: false }
-    ]
+   status: [
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
+    ],
   }
 }
 
@@ -371,10 +383,9 @@ export const subjectTableConfig = {
   statusField: 'status',
   filterConfig: {
     status: [
-      { value: 'Active', label: 'Active', selected: false },
-      { value: 'Inactive', label: 'Inactive', selected: false },
-      { value: 'Pending', label: 'Pending', selected: false }
-    ]
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
+    ],
   }
 }
 
@@ -406,12 +417,10 @@ export const examTableConfig = {
   searchFields: ['questionPaper.title', 'batch.batchName'],
   statusField: 'status',
   filterConfig: {
-    status: [
-      { value: 'scheduled', label: 'Scheduled', selected: false },
-      { value: 'ongoing', label: 'Ongoing', selected: false },
-      { value: 'completed', label: 'Completed', selected: false },
-      { value: 'cancelled', label: 'Cancelled', selected: false }
-    ]
+  status: [
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
+    ],
   }
 }
 
@@ -451,11 +460,10 @@ export const questionpaperTableConfig = {
   searchFields: ['title', 'courseId'],
   statusField: 'status',
   filterConfig: {
-    status: [
-      { value: 'Active', label: 'Active', selected: false },
-      { value: 'Inactive', label: 'Inactive', selected: false },
-      { value: 'Draft', label: 'Draft', selected: false }
-    ]
+   status: [
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
+    ],
   }
 }
 
@@ -491,7 +499,12 @@ export const studymaterialTableConfig = {
     // }
   ],
   searchFields: ['title', 'description'],
-  filterConfig: {}
+  filterConfig: {
+    status: [
+      { value: true, label: 'Active', selected: false },
+      { value: false, label: 'Inactive', selected: false }
+    ],
+  }
 }
 
 export const classTableConfig = {

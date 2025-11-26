@@ -382,26 +382,12 @@ const GenericFormModal = ({
         data.avatar = customState.avatar
       }
       
-      // Merge customState array fields with form data to preserve File objects
+      // Use customState for array fields as it has the complete data
       fields.forEach(field => {
         if (field.type === 'array' && customState[field.name] && customState[field.name].length > 0) {
-          if (data[field.name]) {
-            // Merge File objects from customState into form data
-            data[field.name].forEach((item, index) => {
-              if (customState[field.name][index]) {
-                // Copy File objects (like questionImage) from customState
-                Object.keys(customState[field.name][index]).forEach(key => {
-                  if (customState[field.name][index][key] instanceof File) {
-                    item[key] = customState[field.name][index][key]
-                  }
-                })
-              }
-            })
-          } else {
-            const hasData = customState[field.name].some(item => Object.keys(item).length > 0)
-            if (hasData) {
-              data[field.name] = customState[field.name]
-            }
+          const hasData = customState[field.name].some(item => Object.keys(item).length > 0)
+          if (hasData) {
+            data[field.name] = customState[field.name]
           }
         }
       })
