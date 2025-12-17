@@ -49,11 +49,23 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.DATEONLY,
       allowNull: false
     },
+    startTime: {
+      type: DataTypes.TIME,
+      allowNull: true
+    },
     totalMarks: {
       type: DataTypes.INTEGER,
       allowNull: false
     },
     duration: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    marksPerCorrect: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    marksPerIncorrect: {
       type: DataTypes.INTEGER,
       allowNull: false
     },

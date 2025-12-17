@@ -22,6 +22,7 @@ const GenericDataTable = ({
   onStatusToggle,
   onBulkDelete,
   onPrint,
+  onBypass,
   searchFields = [],
   filterConfig = {},
   statusField = null,
@@ -335,6 +336,22 @@ const GenericDataTable = ({
                             return (
                               <Button key="toggle" variant="ghost" size="icon" onClick={() => onStatusToggle(item)} title={item.status ? 'Deactivate' : 'Activate'} className={item.status ? 'text-red-600 hover:text-red-700' : 'text-green-600 hover:text-green-700'}>
                                 <div className={`h-4 w-4 rounded-full ${item.status ? 'bg-red-500' : 'bg-green-500'}`} />
+                              </Button>
+                            )
+                          }
+                          if (action === 'bypass' && onBypass) {
+                            const isCompleted = item.feeStatus === 'Completed';
+                            return (
+                              <Button 
+                                key="bypass" 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => !isCompleted && onBypass(item)} 
+                                title={isCompleted ? 'Already Completed' : 'Bypass Fees'} 
+                                className={isCompleted ? 'text-gray-400 cursor-not-allowed' : 'text-orange-600 hover:text-orange-700'}
+                                disabled={isCompleted}
+                              >
+                                Bypass
                               </Button>
                             )
                           }

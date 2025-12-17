@@ -366,7 +366,7 @@ export const subjectTableConfig = {
       label: 'Subject Code'
     },
     {
-      key: 'staffId',
+      key: 'staffIds',
       label: 'Assigned Staff',
       render: (value, item) => {
         return React.createElement(LookupCell, { ids: value, type: 'staff' })
@@ -547,6 +547,38 @@ export const classTableConfig = {
       { value: 'Active', label: 'Active', selected: false },
       { value: 'Inactive', label: 'Inactive', selected: false },
       { value: 'Pending', label: 'Pending', selected: false }
+    ]
+  }
+}
+
+export const commonAttendanceTableConfig = {
+  title: 'Common Attendance Management',
+  description: 'Track common attendance records by batch and date',
+  columns: [
+    {
+      key: 'batchId',
+      label: 'Batch',
+      render: (value, item) => {
+        return value ? React.createElement(LookupCell, { ids: value, type: 'batch' }) : 'N/A'
+      }
+    },
+    {
+      key: 'date',
+      label: 'Date'
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      type: 'badge',
+      getBadgeColor: getStatusColor
+    }
+  ],
+  searchFields: ['batchId', 'date'],
+  statusField: 'status',
+  filterConfig: {
+    status: [
+      { value: 'Active', label: 'Active', selected: false },
+      { value: 'Inactive', label: 'Inactive', selected: false }
     ]
   }
 }

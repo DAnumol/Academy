@@ -2,15 +2,21 @@ const { Result, Student, Exam, QuestionPaper } = require('../models');
 const generateIds = require('../utils/generateId');
 const { sendSuccess, sendError } = require('../utils/response');
 
-const NEET_CONFIG = {
-  TOTAL_MARKS: 720,
-  TOTAL_QUESTIONS: 180
-};
-
 const createResult = async (req, res) => {
   try {
     const { studentId, examId, obtainedMarks, grade, remarks, status } = req.body;
-    const percentage = (obtainedMarks / NEET_CONFIG.TOTAL_MARKS) * 100;
+    
+    const exam = await Exam.findOne({
+      where: { examId },
+      include: [{ model: QuestionPaper, as: 'questionPaper', attributes: ['totalMarks'] }]
+    });
+    
+    if (!exam || !exam.questionPaper) {
+      return sendError(res, 404, 'Exam or question paper not found');
+    }
+    
+    const totalMarks = exam.questionPaper.totalMarks;
+    const percentage = (obtainedMarks / totalMarks) * 100;
 
     const resultStatus = status !== undefined ? Boolean(status) : true;
 
@@ -18,7 +24,7 @@ const createResult = async (req, res) => {
       resultId: generateIds.result(),
       studentId, 
       examId, 
-      totalMarks: NEET_CONFIG.TOTAL_MARKS, 
+      totalMarks, 
       obtainedMarks, 
       percentage, 
       grade, 
@@ -81,17 +87,28 @@ const getResultById = async (req, res) => {
 const updateResult = async (req, res) => {
   try {
     const updateData = req.body;
-    updateData.totalMarks = NEET_CONFIG.TOTAL_MARKS;
+    
+    const result = await Result.findOne({
+      where: { resultId: req.params.id },
+      include: [{ 
+        model: Exam, 
+        as: 'exam',
+        include: [{ model: QuestionPaper, as: 'questionPaper', attributes: ['totalMarks'] }]
+      }]
+    });
+    
+    if (!result) return sendError(res, 404, 'Result not found');
+    
+    const totalMarks = result.exam.questionPaper.totalMarks;
+    updateData.totalMarks = totalMarks;
     
     if (updateData.obtainedMarks) {
-      updateData.percentage = (updateData.obtainedMarks / NEET_CONFIG.TOTAL_MARKS) * 100;
+      updateData.percentage = (updateData.obtainedMarks / totalMarks) * 100;
     }
 
     const [updatedRowsCount] = await Result.update(updateData, {
       where: { resultId: req.params.id }
     });
-
-    if (updatedRowsCount === 0) return sendError(res, 404, 'Result not found');
 
     const updatedResult = await Result.findOne({
       where: { resultId: req.params.id }

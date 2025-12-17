@@ -27,9 +27,9 @@ const AttendanceTable = () => {
       delete: attendanceService.delete
     },
     messages: {
-      create: 'Batch details created successfully!',
-      update: 'Batch details updated successfully!',
-      delete: 'Batch details deleted successfully!'
+      create: 'Attendance created successfully!',
+      update: 'Attendance updated successfully!',
+      delete: 'Attendance deleted successfully!'
     }
   })
   

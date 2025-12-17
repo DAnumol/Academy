@@ -13,23 +13,30 @@
     "db:drop": "npx sequelize-cli db:drop"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "sequelize": "^6.35.0",
-    "mysql2": "^3.6.5",
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "multer": "^1.4.5-lts.1",
+    "exceljs": "^4.4.0",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
     "express-validator": "^7.0.1",
     "helmet": "^7.1.0",
-    "express-rate-limit": "^7.1.5"
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.6.5",
+    "pdfkit": "^0.17.2",
+    "sequelize": "^6.35.0"
   },
   "devDependencies": {
     "nodemon": "^3.0.2",
     "sequelize-cli": "^6.6.2"
   },
-  "keywords": ["neet", "academy", "education", "management"],
+  "keywords": [
+    "neet",
+    "academy",
+    "education",
+    "management"
+  ],
   "author": "NEET Academy",
   "license": "MIT"
 }

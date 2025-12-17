@@ -30,11 +30,13 @@ db.Class = require('./Class')(sequelize, Sequelize.DataTypes);
 db.Timetable = require('./Timetable')(sequelize, Sequelize.DataTypes);
 db.QuestionPaper = require('./QuestionPaper')(sequelize, Sequelize.DataTypes);
 db.Attendance = require('./Attendance')(sequelize, Sequelize.DataTypes);
+db.CommonAttendance = require('./CommonAttendance')(sequelize, Sequelize.DataTypes);
 db.Material = require('./Material')(sequelize, Sequelize.DataTypes);
 db.Exam = require('./Exam')(sequelize, Sequelize.DataTypes);
 db.Result = require('./Result')(sequelize, Sequelize.DataTypes);
 db.Notification = require('./Notification')(sequelize, Sequelize.DataTypes);
 db.ThemePreference = require('./ThemePreference')(sequelize, Sequelize.DataTypes);
+db.FeePayment = require('./FeePayment')(sequelize, Sequelize.DataTypes);
 
 // Define associations
 Object.keys(db).forEach(modelName => {

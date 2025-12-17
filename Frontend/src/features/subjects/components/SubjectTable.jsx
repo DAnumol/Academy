@@ -112,6 +112,7 @@ const SubjectTable = () => {
         onDelete={can(PERMISSIONS.DELETE_SUBJECT) ? handleDelete : undefined}
         onBulkDelete={can(PERMISSIONS.DELETE_SUBJECT) ? handleBulkDelete : undefined}
         searchFields={subjectTableConfig.searchFields}
+        
         filterConfig={subjectTableConfig.filterConfig}
         statusField={subjectTableConfig.statusField}
         actions={allowedActions}
@@ -127,7 +128,7 @@ const SubjectTable = () => {
         }}
         onSubmit={handleFormSubmit}
         title={showEditModal ? 'Edit Subject' : subjectFormConfig.title}
-        fields={showEditModal ? subjectFormConfig.fields : subjectFormConfig.fields.filter(f => f.name !== 'staffId')}
+        fields={showEditModal ? subjectFormConfig.fields : subjectFormConfig.fields.filter(f => f.name !== 'staffIds')}
         initialData={showEditModal && selectedUser ? selectedUser : null}
         isLoading={createMutation.isPending || updateMutation.isPending}
       />

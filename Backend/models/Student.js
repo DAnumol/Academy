@@ -151,6 +151,11 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.TEXT('long'),
       allowNull: true
     },
+    specialFees: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: true,
+      defaultValue: null
+    },
     status: {
       type: DataTypes.BOOLEAN,
       allowNull: false,
@@ -166,6 +171,7 @@ module.exports = (sequelize, DataTypes) => {
     Student.belongsTo(models.Batch, { foreignKey: 'batchId', as: 'batch' });
     Student.belongsTo(models.Course, { foreignKey: 'courseId', as: 'course' });
     Student.hasMany(models.Result, { foreignKey: 'studentId', as: 'results' });
+    Student.hasMany(models.FeePayment, { foreignKey: 'studentId', as: 'feePayments' });
   };
  
   return Student;

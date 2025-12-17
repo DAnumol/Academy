@@ -17,7 +17,9 @@ const GenericFormModal = ({
   title,
   fields = [],
   initialData = null,
-  isLoading = false
+  isLoading = false,
+  onExamChange,
+  onObtainedMarksChange
 }) => {
 
   const [customState, setCustomState] = useState({ tags: [], tagInput: '', avatar: null })
@@ -434,11 +436,27 @@ const GenericFormModal = ({
   }
 
   const renderField = (field, index) => {
-    const { name, label, type = 'text', placeholder, required, validation = {}, options = [], render } = field
+    const { name, label, type = 'text', placeholder, required, validation = {}, options = [], render, component: CustomComponent } = field
 
     // Custom render function
     if (render) {
       return render({ register, errors, watch, setValue, customState, setCustomState })
+    }
+
+    // Custom component
+    if (type === 'custom' && CustomComponent) {
+      return (
+        <div key={name} className="w-full">
+          <CustomComponent
+            name={name}
+            label={label}
+            required={required}
+            value={watch(name)}
+            onChange={(value) => setValue(name, value)}
+            error={errors[name]?.message}
+          />
+        </div>
+      )
     }
 
     // Standard input types
@@ -488,7 +506,13 @@ const GenericFormModal = ({
             disabled={isDisabled}
             {...register(name, {
               required: required ? `${label} is required` : false,
-              ...validation
+              ...validation,
+              onChange: (e) => {
+                if (name === 'obtainedMarks' && onObtainedMarksChange) {
+                  const totalMarks = watch('totalMarks')
+                  onObtainedMarksChange(e.target.value, totalMarks, setValue)
+                }
+              }
             })}
           />
         </div>
@@ -624,13 +648,15 @@ const GenericFormModal = ({
               })}
               onChange={(e) => {
                 setValue(name, e.target.value)
-                // Handle userId selection to populate name and email fields
                 if (field.onChange === 'populateUserFields' && e.target.value) {
                   const selectedUser = selectOptions.find(option => option.value === e.target.value)
                   if (selectedUser && selectedUser.userData) {
                     setValue('name', selectedUser.userData.name)
                     setValue('email', selectedUser.userData.email)
                   }
+                }
+                if (name === 'examId' && onExamChange) {
+                  onExamChange(e.target.value, setValue)
                 }
               }}
             >

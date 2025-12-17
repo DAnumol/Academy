@@ -1,4 +1,4 @@
-# Enterprise Admin Dashboard
+# Academy Admin Dashboard
 
 A production-ready React admin dashboard with enterprise-grade security, animations, and modern architecture featuring advanced HOCs, comprehensive state management, and performance optimizations.
 
@@ -167,7 +167,7 @@ src/
 
 ```env
 # Application
-VITE_APP_NAME=Enterprise Admin Dashboard
+VITE_APP_NAME=Academy Admin Dashboard
 VITE_APP_VERSION=1.0.0
 VITE_ENVIRONMENT=development
 

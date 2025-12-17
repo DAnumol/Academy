@@ -18,7 +18,8 @@ const generateIds = {
   material: () => generateId('MAT'),
   exam: () => generateId('EXM'),
   result: () => generateId('RES'),
-  notification: () => generateId('NOT')
+  notification: () => generateId('NOT'),
+  feePayment: () => generateId('FP')
 };
 
 module.exports = generateIds;

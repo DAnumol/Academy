@@ -2,12 +2,7 @@ const { Exam, QuestionPaper, Batch, Student, Result } = require('../models');
 const generateIds = require('../utils/generateId');
 const { sendSuccess, sendError } = require('../utils/response');
 
-const NEET_CONFIG = {
-  TOTAL_MARKS: 720,
-  TOTAL_QUESTIONS: 180,
-  MARKS_PER_CORRECT: 4,
-  MARKS_PER_INCORRECT: -1
-};
+
  
 const createExam = async (req, res) => {
   try {
@@ -144,7 +139,7 @@ const getStudentExams = async (req, res) => {
     const exams = await Exam.findAll({
       where: { batchId: student.batchId, status: true },
       include: [
-        { model: QuestionPaper, as: 'questionPaper', attributes: ['qpId', 'title', 'totalMarks', 'duration', 'questionSet'] },
+        { model: QuestionPaper, as: 'questionPaper', attributes: ['qpId', 'title', 'totalMarks', 'duration', 'questionSet', 'startTime', 'examDate'] },
         { model: Batch, as: 'batch', attributes: ['batchName'] }
       ],
       order: [['date', 'DESC']]
@@ -184,6 +179,10 @@ const submitExam = async (req, res) => {
     if (existingResult) return sendError(res, 400, 'Exam already submitted');
 
     const questionSet = exam.questionPaper.questionSet || [];
+    const totalMarks = exam.questionPaper.totalMarks;
+    const marksPerCorrect = exam.questionPaper.marksPerCorrect;
+    const marksPerIncorrect = exam.questionPaper.marksPerIncorrect;
+    
     let obtainedMarks = 0;
     let correctCount = 0;
     let incorrectCount = 0;
@@ -192,23 +191,23 @@ const submitExam = async (req, res) => {
       const studentAnswer = answers[q.id];
       if (studentAnswer) {
         if (studentAnswer === q.correctAnswer) {
-          obtainedMarks += NEET_CONFIG.MARKS_PER_CORRECT;
+          obtainedMarks += marksPerCorrect;
           correctCount++;
         } else {
-          obtainedMarks += NEET_CONFIG.MARKS_PER_INCORRECT;
+          obtainedMarks += marksPerIncorrect;
           incorrectCount++;
         }
       }
     });
 
-    const percentage = ((obtainedMarks / NEET_CONFIG.TOTAL_MARKS) * 100).toFixed(2);
+    const percentage = ((obtainedMarks / totalMarks) * 100).toFixed(2);
     const grade = percentage >= 90 ? 'A+' : percentage >= 80 ? 'A' : percentage >= 70 ? 'B' : percentage >= 60 ? 'C' : percentage >= 50 ? 'D' : 'F';
 
     const result = await Result.create({
       resultId: generateIds.result(),
       studentId: student.studentId,
       examId,
-      totalMarks: NEET_CONFIG.TOTAL_MARKS,
+      totalMarks: totalMarks,
       obtainedMarks,
       percentage,
       grade,

@@ -6,15 +6,37 @@ import { useAuthStore } from '@/store/authStore'
 import { showToast } from '@/utils/toast'
 import ExamAttempt from '../components/ExamAttempt'
 
+const isExamAvailable = (exam) => {
+  const now = new Date()
+  const examDate = new Date(exam.date)
+  examDate.setHours(0, 0, 0, 0)
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  
+  if (today < examDate) return false
+  
+  if (exam.questionPaper?.startTime) {
+    const [hours, minutes] = exam.questionPaper.startTime.split(':')
+    const examStartTime = new Date(exam.date)
+    examStartTime.setHours(parseInt(hours), parseInt(minutes || 0), 0, 0)
+    return now >= examStartTime
+  }
+  
+  return true
+}
+
 const StudentExamPage = () => {
   const [exams, setExams] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedExam, setSelectedExam] = useState(null)
   const [viewingAnswers, setViewingAnswers] = useState(null)
+  const [currentTime, setCurrentTime] = useState(new Date())
   const { user } = useAuthStore()
 
   useEffect(() => {
     fetchExams()
+    const timer = setInterval(() => setCurrentTime(new Date()), 10000)
+    return () => clearInterval(timer)
   }, [])
 
   const fetchExams = async () => {
@@ -35,13 +57,18 @@ const StudentExamPage = () => {
       return
     }
     
-    const examDate = new Date(exam.date)
-    const today = new Date()
-    examDate.setHours(0, 0, 0, 0)
-    today.setHours(0, 0, 0, 0)
-    
-    if (today < examDate) {
-      showToast.error('Exam is not available yet. Please wait until the exam date.')
+    if (!isExamAvailable(exam)) {
+      const examDate = new Date(exam.date)
+      const today = new Date()
+      examDate.setHours(0, 0, 0, 0)
+      today.setHours(0, 0, 0, 0)
+      
+      if (today < examDate) {
+        showToast.error('Exam is not available yet. Please wait until the exam date.')
+      } else if (exam.questionPaper?.startTime) {
+        const [hours, minutes] = exam.questionPaper.startTime.split(':')
+        showToast.error(`Exam will start at ${hours}:${minutes}. Please wait.`)
+      }
       return
     }
     
@@ -166,79 +193,78 @@ const StudentExamPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {exams.map((exam) => (
-            <motion.div
-              key={exam.examId}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700"
-            >
-              <div className="flex justify-between items-start mb-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {exam.questionPaper?.title}
-                </h3>
-                {exam.attempted ? (
-                  <CheckCircle className="h-6 w-6 text-green-500" />
-                ) : (
-                  <AlertCircle className="h-6 w-6 text-yellow-500" />
-                )}
-              </div>
+          {exams.map((exam) => {
+            const available = isExamAvailable(exam)
+            const examDate = new Date(exam.date)
+            const today = new Date()
+            examDate.setHours(0, 0, 0, 0)
+            today.setHours(0, 0, 0, 0)
+            
+            return (
+              <motion.div
+                key={exam.examId}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 border border-gray-200 dark:border-gray-700"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {exam.questionPaper?.title}
+                  </h3>
+                  {exam.attempted ? (
+                    <CheckCircle className="h-6 w-6 text-green-500" />
+                  ) : (
+                    <AlertCircle className="h-6 w-6 text-yellow-500" />
+                  )}
+                </div>
 
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <Clock className="h-4 w-4 mr-2" />
-                  <span>{exam.questionPaper?.duration} minutes</span>
-                </div>
-                <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                  <FileText className="h-4 w-4 mr-2" />
-                  <span>{exam.questionPaper?.totalMarks} marks</span>
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Date: {new Date(exam.date).toLocaleDateString()}
-                </div>
-                {!exam.attempted && (() => {
-                  const examDate = new Date(exam.date)
-                  const today = new Date()
-                  examDate.setHours(0, 0, 0, 0)
-                  today.setHours(0, 0, 0, 0)
-                  return today < examDate ? (
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <Clock className="h-4 w-4 mr-2" />
+                    <span>{exam.questionPaper?.duration} minutes</span>
+                  </div>
+                  <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <FileText className="h-4 w-4 mr-2" />
+                    <span>{exam.questionPaper?.totalMarks} marks</span>
+                  </div>
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    Date: {new Date(exam.date).toLocaleDateString()}
+                  </div>
+                  {!exam.attempted && !available && (
                     <div className="text-xs text-yellow-600 dark:text-yellow-400 mt-1">
-                      Available on {new Date(exam.date).toLocaleDateString()}
+                      {today < examDate 
+                        ? `Available on ${new Date(exam.date).toLocaleDateString()}`
+                        : exam.questionPaper?.startTime 
+                          ? `Starts at ${exam.questionPaper.startTime.substring(0, 5)}`
+                          : ''
+                      }
                     </div>
-                  ) : null
-                })()}
-              </div>
+                  )}
+                </div>
 
-              {exam.attempted ? (
-                <button
-                  onClick={() => handleViewAnswers(exam)}
-                  className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-                >
-                  View Answers
-                </button>
-              ) : (() => {
-                const examDate = new Date(exam.date)
-                const today = new Date()
-                examDate.setHours(0, 0, 0, 0)
-                today.setHours(0, 0, 0, 0)
-                const isAvailable = today >= examDate
-                
-                return (
+                {exam.attempted ? (
+                  <button
+                    onClick={() => handleViewAnswers(exam)}
+                    className="w-full py-2 px-4 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                  >
+                    View Answers
+                  </button>
+                ) : (
                   <button
                     onClick={() => handleStartExam(exam)}
-                    disabled={!isAvailable}
+                    disabled={!available}
                     className={`w-full py-2 px-4 rounded-lg transition-colors ${
-                      isAvailable
-                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                      available
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white cursor-pointer'
                         : 'bg-gray-400 cursor-not-allowed text-gray-200'
                     }`}
                   >
-                    {isAvailable ? 'Start Exam' : 'Not Available Yet'}
+                    {available ? 'Start Exam' : 'Not Available Yet'}
                   </button>
-                )
-              })()}
-            </motion.div>
-          ))}
+                )}
+              </motion.div>
+            )
+          })}
         </div>
       )}
     </div>

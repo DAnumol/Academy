@@ -23,9 +23,9 @@ const ExamTable = () => {
       delete: examService.delete
     },
     messages: {
-      create: 'User created successfully!',
-      update: 'User updated successfully!',
-      delete: 'User deleted successfully!'
+      create: 'Exam created successfully!',
+      update: 'Exam updated successfully!',
+      delete: 'Exam deleted successfully!'
     }
   })
  

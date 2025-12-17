@@ -1,15 +1,17 @@
-const { Subject, Staff } = require('../models');
+const { Subject } = require('../models');
 const generateIds = require('../utils/generateId');
 const { sendSuccess, sendError } = require('../utils/response');
 
 const createSubject = async (req, res) => {
   try {
-    const { name, code, staffId,status } = req.body;
- const subjectStatus = status !== undefined ? Boolean(status) : true;
+    const { name, code, staffIds, status } = req.body;
+    const subjectStatus = status !== undefined ? Boolean(status) : true;
     const subject = await Subject.create({
       subjectId: generateIds.subject(),
-      name, code, staffId,
-      status:subjectStatus
+      name,
+      code,
+      staffIds: staffIds || [],
+      status: subjectStatus
     });
 
     sendSuccess(res, 'Subject created successfully', subject, 201);
@@ -21,7 +23,6 @@ const createSubject = async (req, res) => {
 const getAllSubjects = async (req, res) => {
   try {
     const subjects = await Subject.findAll({
-      include: [{ model: Staff, as: 'staff', attributes: ['name', 'email','status'] }],
       order: [['createdAt', 'DESC']]
     });
 
@@ -33,9 +34,7 @@ const getAllSubjects = async (req, res) => {
 
 const getSubjectById = async (req, res) => {
   try {
-    const subject = await Subject.findByPk(req.params.id, {
-      include: [{ model: Staff, as: 'staff' }]
-    });
+    const subject = await Subject.findByPk(req.params.id);
 
     if (!subject) return sendError(res, 404, 'Subject not found');
     sendSuccess(res, 'Subject retrieved successfully', subject);

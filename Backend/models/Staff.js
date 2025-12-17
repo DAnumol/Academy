@@ -68,7 +68,6 @@ module.exports = (sequelize, DataTypes) => {
 
   Staff.associate = (models) => {
     Staff.belongsTo(models.User, { foreignKey: 'userId', as: 'user' });
-    Staff.hasMany(models.Subject, { foreignKey: 'staffId', as: 'subjects' });
     Staff.belongsTo(models.Batch, { foreignKey: 'batchId', as: 'batch' });
     Staff.hasMany(models.QuestionPaper, { foreignKey: 'createdBy', as: 'questionPapers' });
     Staff.hasMany(models.Material, { foreignKey: 'uploadedBy', as: 'materials' });

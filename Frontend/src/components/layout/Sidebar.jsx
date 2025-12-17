@@ -39,13 +39,16 @@ const navigation = [
   { name: 'Student', href: ROUTES.STUDENT, icon: UserSquare, permission: PERMISSIONS.VIEW_STUDENTS },
   // { name: 'Classes', href: ROUTES.CLASSES, icon: School, permission: PERMISSIONS.VIEW_CLASSES },
   { name: 'TimeTables', href: ROUTES.TIMETABLE, icon: CalendarClock, permission: PERMISSIONS.VIEW_TIMETABLE },
-  { name: 'Attendance', href: ROUTES.ATTENDANCE, icon: ClipboardCheck, permission: PERMISSIONS.VIEW_ATTENDANCE },
+  { name: 'commonAttendance', href: ROUTES.COMMON_ATTENDANCE, icon: ClipboardCheck, permission: PERMISSIONS.VIEW_ATTENDANCE },
+   { name: 'Attendance', href: ROUTES.ATTENDANCE, icon: ClipboardCheck, permission: PERMISSIONS.VIEW_ATTENDANCE },
   { name: 'StudyMaterials', href: ROUTES.STUDYMATERIAL, icon: BookOpen, permission: PERMISSIONS.VIEW_MATERIALS },
   { name: 'QuestionPapers', href: ROUTES.QUESTIONPAPER, icon: FileQuestion, permission: PERMISSIONS.VIEW_QUESTION_PAPERS },
   { name: 'Exams', href: ROUTES.EXAMS, icon: ClipboardList, permission: PERMISSIONS.VIEW_EXAMS },
   { name: 'My Exams', href: ROUTES.STUDENT_EXAMS, icon: ClipboardList, permission: PERMISSIONS.ATTEMPT_EXAM },
   { name: 'Results', href: ROUTES.RESULTS, icon: ScrollText, permission: PERMISSIONS.CREATE_RESULT },
   { name: 'My Results', href: ROUTES.STUDENT_RESULTS, icon: ScrollText, permission: PERMISSIONS.ATTEMPT_EXAM },
+  
+   { name: 'Payment', href: ROUTES.PAYMENT, icon: ClipboardCheck},
 ]
 
 const Sidebar = memo(() => {

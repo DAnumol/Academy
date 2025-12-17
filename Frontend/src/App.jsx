@@ -29,6 +29,8 @@ const QuestionPaperPage = lazy(() => import('@features/questionpapers/pages/Ques
 const SubjectPage = lazy(() => import('@features/subjects/pages/SubjectPage'))
 const CoursePage = lazy(() => import('@features/course/pages/CoursePage'))
 // const ClassPage = lazy(() => import('@features/class/pages/ClassPage'))
+const CommonAttendancePage = lazy(() => import('@features/commonattendance/pages/CommonAttendancePage'))
+const FeesPage = lazy(() => import('@features/fees/pages/FeeManagementPage'))
 const ExamPage = lazy(() => import('@features/exam/pages/ExamPage'))
 const ResultPage = lazy(() => import('@features/results/pages/ResultPage'))
 const StudentsPage = lazy(() => import('@features/student/pages/StudentsPage'))
@@ -49,11 +51,11 @@ const ProtectedDashboardLayout = withAuth(DashboardLayout)
 
 function App() {
   const { isDark } = useTheme()
-  
+
   const handleGoBack = useCallback(() => {
     window.history.back()
   }, [])
-  
+
 
 
   return (
@@ -100,14 +102,7 @@ function App() {
                 </PageTransition>
               }
             />
-            <Route
-              path={ROUTES.ANALYTICS}
-              element={
-                <PageTransition>
-                  <AnalyticsPage />
-                </PageTransition>
-              }
-            />
+
             <Route
               path={ROUTES.USERS}
               element={
@@ -132,7 +127,7 @@ function App() {
               path={ROUTES.BATCH}
               element={
                 <PageTransition>
-                  <BatchPage/>
+                  <BatchPage />
                 </PageTransition>
               }
             />
@@ -140,7 +135,25 @@ function App() {
               path={ROUTES.ATTENDANCE}
               element={
                 <PageTransition>
-                  <AttendancePage/>
+                  <AttendancePage />
+                </PageTransition>
+              }
+            />
+
+            <Route
+              path={ROUTES.PAYMENT}
+              element={
+                <PageTransition>
+                  <FeesPage />
+                </PageTransition>
+              }
+            />
+
+            <Route
+              path={ROUTES.COMMON_ATTENDANCE}
+              element={
+                <PageTransition>
+                  <CommonAttendancePage />
                 </PageTransition>
               }
             />
@@ -162,7 +175,7 @@ function App() {
                 </PageTransition>
               }
             />
-             <Route
+            <Route
               path={ROUTES.COURSES}
               element={
                 <ProtectedRoute requiredPermission={PERMISSIONS.VIEW_COURSES}>
@@ -180,7 +193,7 @@ function App() {
                 </PageTransition>
               }
             /> */}
-             <Route
+            <Route
               path={ROUTES.EXAMS}
               element={
                 <PageTransition>
@@ -208,7 +221,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
-             <Route
+            <Route
               path={ROUTES.RESULTS}
               element={
                 <PageTransition>
@@ -224,7 +237,7 @@ function App() {
                 </PageTransition>
               }
             />
-            
+
             <Route
               path={ROUTES.STUDYMATERIAL}
               element={
@@ -233,8 +246,8 @@ function App() {
                 </PageTransition>
               }
             />
-            
-              <Route
+
+            <Route
               path={ROUTES.QUESTIONPAPER}
               element={
                 <PageTransition>

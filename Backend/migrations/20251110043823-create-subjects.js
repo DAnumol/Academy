@@ -17,13 +17,9 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      staffId: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        references: {
-          model: 'staffs',
-          key: 'staffId'
-        }
+      staffIds: {
+        type: Sequelize.JSON,
+        allowNull: true
       },
       createdAt: {
         type: Sequelize.DATE,

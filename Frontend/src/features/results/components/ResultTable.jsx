@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import GenericDataTable from '@components/ui/GenericDataTable'
 import GenericFormModal from '@components/ui/GenericFormModal'
-
 import { useGenericCRUD } from '@hooks/useGenericCRUD'
 import { resultService } from '@/services/resultService'
 import { resultTableConfig } from '@config/tableConfigs'
 import { resultFormConfig } from '@config/formConfigs'
+import { apiClient } from '@/services/apiClient'
 
 const ResultTable = () => {
   const [showAddModal, setShowAddModal] = useState(false)
@@ -22,9 +22,9 @@ const ResultTable = () => {
       delete: resultService.delete
     },
     messages: {
-      create: 'User created successfully!',
-      update: 'User updated successfully!',
-      delete: 'User deleted successfully!'
+      create: 'Result created successfully!',
+      update: 'Result updated successfully!',
+      delete: 'Result deleted successfully!'
     }
   })
   
@@ -53,6 +53,40 @@ const ResultTable = () => {
       await updateMutation.mutateAsync({ id: selectedUser.resultId, ...data })
     } else {
       await createMutation.mutateAsync(data)
+    }
+  }
+
+  const handleExamChange = async (examId, setValue) => {
+    if (examId) {
+      try {
+        const response = await apiClient.get(`/exams/${examId}`)
+        const exam = response.data || response
+        if (exam.questionPaper?.totalMarks) {
+          setValue('totalMarks', exam.questionPaper.totalMarks)
+        }
+      } catch (error) {
+        console.error('Error fetching exam details:', error)
+      }
+    }
+  }
+
+  const handleObtainedMarksChange = (obtainedMarks, totalMarks, setValue) => {
+    if (totalMarks && obtainedMarks !== undefined && obtainedMarks !== '') {
+      const obtained = parseFloat(obtainedMarks)
+      const total = parseFloat(totalMarks)
+      if (total > 0 && obtained >= 0) {
+        const percentage = ((obtained / total) * 100).toFixed(2)
+        setValue('percentage', percentage)
+        
+        let grade = 'F'
+        if (percentage >= 90) grade = 'A+'
+        else if (percentage >= 80) grade = 'A'
+        else if (percentage >= 70) grade = 'B+'
+        else if (percentage >= 60) grade = 'B'
+        else if (percentage >= 50) grade = 'C'
+        else if (percentage >= 40) grade = 'D'
+        setValue('grade', grade)
+      }
     }
   }
    const handleStatusToggle = async (result) => {
@@ -98,6 +132,8 @@ const ResultTable = () => {
         fields={resultFormConfig.fields}
         initialData={showEditModal && selectedUser ? selectedUser : null}
         isLoading={createMutation.isPending || updateMutation.isPending}
+        onExamChange={handleExamChange}
+        onObtainedMarksChange={handleObtainedMarksChange}
       />
       
      

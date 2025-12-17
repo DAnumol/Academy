@@ -17,12 +17,14 @@ const classRoutes = require('./routes/classes');
 const timetableRoutes = require('./routes/timetables');
 const questionPaperRoutes = require('./routes/questionpapers');
 const attendanceRoutes = require('./routes/attendance');
+const commonAttendanceRoutes = require('./routes/commonAttendanceRoutes');
 const materialRoutes = require('./routes/materials');
 const examRoutes = require('./routes/exams');
 const resultRoutes = require('./routes/results');
 const notificationRoutes = require('./routes/notifications');
 const dashboardRoutes = require('./routes/dashboard');
 const themeRoutes = require('./routes/theme');
+const feePaymentRoutes = require('./routes/feePayments');
 
 const app = express();
 
@@ -64,12 +66,14 @@ app.use('/api/classes', classRoutes);
 app.use('/api/timetables', timetableRoutes);
 app.use('/api/questionpapers', questionPaperRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/commonattendance', commonAttendanceRoutes);
 app.use('/api/materials', materialRoutes);
 app.use('/api/exams', examRoutes);
 app.use('/api/results', resultRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/theme', themeRoutes);
+app.use('/api/fee-payments', feePaymentRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

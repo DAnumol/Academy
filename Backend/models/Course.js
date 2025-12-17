@@ -55,6 +55,7 @@ module.exports = (sequelize, DataTypes) => {
     Course.belongsTo(models.User, { foreignKey: 'createdBy', as: 'creator' });
     Course.hasMany(models.Student, { foreignKey: 'courseId', as: 'students' });
     Course.hasMany(models.Batch, { foreignKey: 'courseId', as: 'batches' });
+    Course.hasMany(models.FeePayment, { foreignKey: 'courseId', as: 'feePayments' });
   };
 
   return Course;

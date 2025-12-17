@@ -14,13 +14,10 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
       unique: true
     },
-    staffId: {
-      type: DataTypes.STRING(20),
+    staffIds: {
+      type: DataTypes.JSON,
       allowNull: true,
-      references: {
-        model: 'staffs',
-        key: 'staffId'
-      }
+      defaultValue: []
     },
      status: {
        type: DataTypes.BOOLEAN,
@@ -33,7 +30,6 @@ module.exports = (sequelize, DataTypes) => {
   });
 
   Subject.associate = (models) => {
-    Subject.belongsTo(models.Staff, { foreignKey: 'staffId', as: 'staff' });
     Subject.hasMany(models.QuestionPaper, { foreignKey: 'subjectId', as: 'questionPapers' });
     Subject.hasMany(models.Material, { foreignKey: 'subjectId', as: 'materials' });
   };

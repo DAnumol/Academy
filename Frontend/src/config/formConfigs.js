@@ -113,15 +113,14 @@ export const subjectFormConfig = {
       }
     },
     {
-      name: 'staffId',
+      name: 'staffIds',
       label: 'Assigned Staff',
-      type: 'select',
+      type: 'multiselect',
       placeholder: 'Select staff',
       required: true,
       section: 'subjectManagement',
       sectionTitle: 'Staff Assignment & Status',
       apiEndpoint: '/staff',
-     
       valueField: 'staffId',
       labelField: 'name'
     },
@@ -392,13 +391,12 @@ export const resultFormConfig = {
     // Marks & Performance
     {
       name: 'totalMarks',
-      label: 'Total Marks',
+      label: 'Total Marks (Auto-filled from Question Paper)',
       type: 'text',
-      placeholder: 'Enter Total Marks',
-      required: true,
+      placeholder: 'Auto-filled',
+      required: false,
       section: 'marks',
-      sectionTitle: 'Marks & Performance (NEET Pattern: 720 Total)',
-      defaultValue: 720,
+      sectionTitle: 'Marks & Performance',
       disabled: true
     },
     {
@@ -708,6 +706,13 @@ export const studentFormConfig = {
       type: 'number',
       placeholder: 'Enter roll no',
       required: true,
+      section: 'academic'
+    },
+    {
+      name: 'specialFees',
+      label: 'Special Fees (Optional)',
+      type: 'number',
+      placeholder: 'Enter special fees amount',
       section: 'academic'
     },
  
@@ -1312,13 +1317,20 @@ export const questionPaperFormConfig = {
       sectionTitle: 'Exam Information (NEET Pattern)'
     },
     {
+      name: 'startTime',
+      label: 'Exam Start Time',
+      type: 'time',
+      required: true,
+      section: 'examInfo',
+      placeholder: 'Select start time'
+    },
+    {
       name: 'totalMarks',
       label: 'Total Marks',
       type: 'number',
       required: true,
       section: 'examInfo',
-      defaultValue: 720,
-      disabled: true
+      placeholder: 'Enter total marks'
     },
     {
       name: 'duration',
@@ -1326,8 +1338,23 @@ export const questionPaperFormConfig = {
       type: 'number',
       required: true,
       section: 'examInfo',
-      defaultValue: 180,
-      disabled: true
+      placeholder: 'Enter duration in minutes'
+    },
+    {
+      name: 'marksPerCorrect',
+      label: 'Marks Per Correct Answer',
+      type: 'number',
+      required: true,
+      section: 'examInfo',
+      placeholder: 'Enter marks for correct answer'
+    },
+    {
+      name: 'marksPerIncorrect',
+      label: 'Marks Per Incorrect Answer (Negative)',
+      type: 'number',
+      required: true,
+      section: 'examInfo',
+      placeholder: 'Enter negative marks (e.g., -1)'
     },
 
     // File Upload
@@ -1403,3 +1430,71 @@ export const questionPaperFormConfig = {
   ]
 }
 
+
+// Common Attendance form Configuration
+export const commonAttendanceFormConfig = {
+  title: 'Create Common Attendance',
+  fields: [
+    {
+      name: 'batchId',
+      label: 'Batch',
+      type: 'select',
+      placeholder: 'Select Batch',
+      section: 'mapping',
+      sectionTitle: 'Batch & Date Details',
+      required: true,
+      apiEndpoint: '/batches',
+      valueField: 'batchId',
+      labelField: 'batchName'
+    },
+    {
+      name: 'date',
+      label: 'Date',
+      type: 'date',
+      section: 'mapping',
+      required: true
+    },
+    {
+      name: 'records',
+      label: 'Student Attendance',
+      type: 'array',
+      section: 'records',
+      sectionTitle: 'Student Attendance Records',
+      addButtonText: 'Add Attendance',
+      itemLabel: 'Attendance',
+      fields: [
+        {
+          name: 'studentId',
+          label: 'Student',
+          type: 'select',
+          placeholder: 'Select Student',
+          apiEndpoint: '/students',
+          valueField: 'studentId',
+          labelField: 'name'
+        },
+        {
+          name: 'attendanceStatus',
+          label: 'Attendance Status',
+          type: 'select',
+          options: [
+            { value: 'Present', label: 'Present' },
+            { value: 'Absent', label: 'Absent' },
+            { value: 'Late', label: 'Late' }
+          ]
+        }
+      ]
+    },
+    {
+      name: 'status',
+      label: 'Status',
+      type: 'select',
+      placeholder: 'Select status',
+      section: 'status',
+      sectionTitle: 'System Status',
+      options: [
+        { value: 'Active', label: 'Active' },
+        { value: 'Inactive', label: 'Inactive' }
+      ]
+    }
+  ]
+}

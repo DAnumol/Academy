@@ -271,7 +271,7 @@ const handleStatusToggle = async (student) => {
           setSelectedStudent(null)
         }}
         onSubmit={handleFormSubmit}
-        title={showEditModal ? 'Edit User' : studentFormConfig.title}
+        title={showEditModal ? 'Edit Student' : studentFormConfig.title}
         fields={studentFormConfig.fields}
         initialData={showEditModal && selectedStudent ? selectedStudent : null}
         isLoading={createMutation.isPending || updateMutation.isPending}

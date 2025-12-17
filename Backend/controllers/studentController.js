@@ -153,7 +153,7 @@ const { sendSuccess, sendError } = require('../utils/response');
  
 const createStudent = async (req, res) => {
   try {
-    const { userId: existingUserId, name, email, password, dob, gender, address, phone, batchId, courseId, rollNo, status,avatar } = req.body;
+    const { userId: existingUserId, name, email, password, dob, gender, address, phone, batchId, courseId, rollNo, status, avatar, specialFees } = req.body;
  
     let userId = existingUserId;
     const studentStatus = status !== undefined ? Boolean(status) : true;
@@ -189,6 +189,7 @@ const createStudent = async (req, res) => {
       courseId: courseId || null,
       rollNo,
       profilePic: avatar || (req.file ? req.file.path : null),
+      specialFees: specialFees || null,
       status: studentStatus
     });
  

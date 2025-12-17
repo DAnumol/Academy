@@ -7,7 +7,7 @@
 
 export const APP_CONFIG = {
   // Application Info
-  name: import.meta.env.VITE_APP_NAME || 'Enterprise Admin Dashboard',
+  name: import.meta.env.VITE_APP_NAME || 'Academy Admin Dashboard',
   version: import.meta.env.VITE_APP_VERSION || '1.0.0',
   description: 'Modern enterprise-grade React admin dashboard',
   

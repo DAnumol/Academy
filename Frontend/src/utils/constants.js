@@ -28,6 +28,8 @@ export const ROUTES = {
   STUDENT_EXAMS: '/student-exams',
   STUDENT_RESULTS: '/student-results',
   ADMIN_REGISTER: '/admin-register',
+  COMMON_ATTENDANCE:'/common-atendance',
+  PAYMENT:'/payment'
 }
 
 export const STORAGE_KEYS = {
